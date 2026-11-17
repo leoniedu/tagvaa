@@ -161,6 +161,7 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 | 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO) + R script | ✅ 2026-11-17: Mac and iPhone (Bluefruit Connect), 0 lost, ~100.6 Hz; boat session pending |
 | 5 | — | On-device stroke detector | after real data |
 | 6 | — | Power management | later |
+| — | `docs/junction_box.md` | Sidequest: solar + battery junction box | paper design |
 
 Serial monitor (any milestone): `.venv/bin/pio device monitor`
 (115200 baud, Ctrl-C quits). Back to the bootloader: type `dfu` + Enter in the
