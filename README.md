@@ -162,10 +162,22 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 | 5 | — | On-device stroke detector | after real data |
 | 6 | — | Power management | later |
 | — | `docs/junction_box.md` | Sidequest: solar + battery junction box | paper design |
+| T | `t_rail` | Test: what is on the switched 3.3 V rail (accelerometer? GNSS?), current with rail on/off | built, not yet run |
 
 Serial monitor (any milestone): `.venv/bin/pio device monitor`
 (115200 baud, Ctrl-C quits). Back to the bootloader: type `dfu` + Enter in the
 monitor, or hold the front button 5 s.
+
+### T — 3.3 V rail test (`t_rail.uf2`)
+
+Meshtastic drives `PIN_3V3_EN` (P1.02) HIGH and calls it the GNSS / 3.3 V
+peripheral rail. This test reports, with the rail ON, OFF and ON again: I2C
+line levels (it skips I2C if they are low, so a bus without pull-up power
+can't hang the firmware), the I2C scan and LIS2DH WHO_AM_I, how many NMEA
+bytes the GNSS sends on Serial1 (9600 baud) in 3 s, and the battery voltage.
+Then it toggles the rail every 30 s (green LED = rail on) so a USB power
+meter shows the current difference; the Tag battery should be full so
+charging doesn't mask it.
 
 ### 1 — Hello world (`m1_hello.uf2`)
 
@@ -224,6 +236,8 @@ then on the CS300 add a cadence sensor: it should find "Paddle Stroke" and show
   ```
 
   `seq` is a gap-free sample counter (use it for timing; gaps = lost data),
+  `# battery t_ms=… mv=…` lines carry the Tag battery voltage (in each
+  header and once a minute; `read_battery()` in R extracts them),
   `t_ms` the device uptime (for aligning with other recordings). `#` lines
   are comments, including `# FIFO overrun …`.
 - Requests MTU 247, 2M PHY and a 15 ms connection interval.

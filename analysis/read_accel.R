@@ -70,18 +70,33 @@ add_wall_clock <- function(acc, clock, date, tz) {
 
 # date: day of the recording (the export only has times of day); defaults to
 # the file's modification date. tz: the phone's time zone.
-read_accel <- function(path, date = NULL, tz = Sys.timezone()) {
-  clock <- NULL
+# All text lines of a recording (Bluefruit/ble_log export or plain), plus the
+# phone clock table when the export has timestamps.
+read_stream_lines <- function(path) {
   if (file.size(path) > large_file_bytes) {
     lines <- data.table::fread(path, sep = NULL, header = FALSE)[[1]]
   } else {
     lines <- read_lines(path)
   }
   if (length(lines) > 0 && lines[[1]] == "Timestamp,Mode,Data") {
-    unpacked <- unpack_bluefruit(path)
-    lines <- unpacked$lines
-    clock <- unpacked$clock
+    return(unpack_bluefruit(path))
   }
+  list(lines = lines, clock = NULL)
+}
+
+# Battery voltage lines ("# battery t_ms=... mv=...", once a minute).
+read_battery <- function(path) {
+  m <- str_match(read_stream_lines(path)$lines, "# battery t_ms=(\\d+) mv=(\\d+)")
+  tibble(t_ms = as.numeric(m[, 2]), battery_mv = as.numeric(m[, 3])) |>
+    drop_na() |>
+    distinct(t_ms, .keep_all = TRUE) |>
+    arrange(t_ms)
+}
+
+read_accel <- function(path, date = NULL, tz = Sys.timezone()) {
+  stream <- read_stream_lines(path)
+  lines <- stream$lines
+  clock <- stream$clock
   rows <- str_extract(lines, data_pattern)
   rows <- rows[!is.na(rows)]
   if (length(rows) == 0) {

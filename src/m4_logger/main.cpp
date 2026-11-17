@@ -8,12 +8,14 @@
 #include <Adafruit_TinyUSB.h>
 #include <Arduino.h>
 #include <Wire.h>
+#include <battery.h>
 #include <bluefruit.h>
 #include <dfu_escape.h>
 #include <lis2dh.h>
 
 constexpr uint32_t SAMPLE_PERIOD_MS = 10; // 100 Hz
-constexpr uint32_t POLL_MS = 50;          // read the FIFO every 50 ms (~5 samples); FIFO holds 32 (320 ms)
+constexpr uint32_t POLL_MS = 50;
+constexpr uint32_t BATTERY_EVERY_MS = 60000; // '# battery' line once a minute          // read the FIFO every 50 ms (~5 samples); FIFO holds 32 (320 ms)
 
 LIS2DH accel;
 BLEUart bleuart;
@@ -129,9 +131,9 @@ void loop()
         bool want = Bluefruit.connected(h) && bleuart.notifyEnabled(h);
         if (want && !streaming[h]) {
             streaming[h] = true;
-            char hdr[96];
-            snprintf(hdr, sizeof hdr, "# Paddle Logger, 100 Hz, +-4 g, uptime %lu ms\nseq,t_ms,x_mg,y_mg,z_mg\n",
-                     (unsigned long)millis());
+            char hdr[160];
+            snprintf(hdr, sizeof hdr, "# Paddle Logger, 100 Hz, +-4 g, uptime %lu ms\n# battery t_ms=%lu mv=%u\nseq,t_ms,x_mg,y_mg,z_mg\n",
+                     (unsigned long)millis(), (unsigned long)millis(), batteryMillivolts());
             bleuart.write(h, (const uint8_t *)hdr, strlen(hdr));
             Serial.printf("# streaming to [%u]\n", h);
         } else if (!want) {
@@ -140,6 +142,14 @@ void loop()
     }
 
     uint32_t now = millis();
+    static uint32_t lastBattery = 0;
+    if (now - lastBattery >= BATTERY_EVERY_MS) {
+        lastBattery = now;
+        char msg[48];
+        snprintf(msg, sizeof msg, "# battery t_ms=%lu mv=%u\n", (unsigned long)now, batteryMillivolts());
+        output(msg);
+    }
+
     bool overrun = false;
     uint8_t n = accel.fifoCount(&overrun);
     if (overrun) {
