@@ -153,7 +153,7 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 |---|---|---|---|
 | 1 | `m1_hello` | USB serial + LED blink | ✅ verified 2026-11-17 (serial, both LEDs, button, `dfu` escape) |
 | 2 | `m2_accel` | I2C scan, LIS2DH WHO_AM_I, x/y/z at 10 Hz | ✅ verified 2026-11-17 (0x19, 0x33, \|a\| ≈ 0.99 g at rest) |
-| 3 | `m3_csc` | BLE CSC sensor, fixed 60 rpm (go/no-go) | built, not yet tested |
+| 3 | `m3_csc` | BLE CSC sensor, fixed 60 rpm (go/no-go) | ✅ Mac BLE check 2026-11-17 (60.0 rpm); iPhone + CS300 pending |
 | 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO, HR mode) + R script | built, not yet tested |
 | 5 | — | On-device stroke detector | after real data |
 | 6 | — | Power management | later |
@@ -190,6 +190,9 @@ Settings: ±4 g, high-resolution 12-bit (2 mg/digit), block data update.
 - Also Device Information and Battery (fixed 100 %) services.
 - Blue LED blinks while advertising, solid when connected; green flashes
   once per "revolution". Serial prints `revs N  event_time T`.
+
+Mac check (Python `bleak` in `.venv`): `.venv/bin/python scripts/csc_check.py`
+scans, reads CSC Feature and decodes 5 notifications into rpm.
 
 Test with nRF Connect (iPhone): scan → OC6 Stroke shows the CSC service
 in the advertisement → connect → Cycling Speed and Cadence → enable
