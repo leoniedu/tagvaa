@@ -18,10 +18,9 @@
 # is found offline here (PCA over the session); on the device it will be a
 # running estimate.
 
-local({
-  here <- if (sys.nframe() == 0) dirname(sub("--file=", "", grep("--file=", commandArgs(), value = TRUE))) else "analysis"
-  source(file.path(here, "read_accel.R"), local = globalenv())
-})
+analysis_dir <- if (sys.nframe() == 0) dirname(sub("--file=", "", grep("--file=", commandArgs(), value = TRUE))) else "analysis"
+project_dir <- normalizePath(file.path(analysis_dir, ".."))
+source(file.path(analysis_dir, "read_accel.R"))
 
 params <- list(
   gravity_tau_s = 2,      # low-pass time constant for gravity
@@ -139,25 +138,30 @@ rate_per_second <- function(strokes, acc, hold_s = 5) {
   out
 }
 
-# Reference cadence (strokes/min) from a watch: .tcx, .fit (needs the
-# FITfileR package) or .csv with columns time (ISO 8601) and cadence.
+# Reference cadence (strokes/min) from a watch: .fit (converted with
+# scripts/fit_to_csv.py in the project venv, or FITfileR if installed),
+# .tcx, or .csv with columns time (ISO 8601) and cadence. Extra columns
+# (speed, distance, heart_rate, lat, lon) are kept when present.
 read_reference <- function(path) {
   ext <- tolower(tools::file_ext(path))
+  if (ext == "fit") {
+    csv <- tempfile(fileext = ".csv")
+    py <- file.path(project_dir, ".venv", "bin", "python")
+    status <- system2(py, c(file.path(project_dir, "scripts", "fit_to_csv.py"), shQuote(path), shQuote(csv)), stdout = FALSE)
+    if (status != 0) stop("FIT conversion failed; is fitdecode installed in .venv?")
+    path <- csv
+    ext <- "csv"
+  }
   if (ext == "tcx") {
     doc <- xml2::read_xml(path) |> xml2::xml_ns_strip()
     tp <- xml2::xml_find_all(doc, "//Trackpoint")
     get <- \(xp) xml2::xml_text(xml2::xml_find_first(tp, xp))
     cadence <- coalesce(as.numeric(get("./Cadence")), as.numeric(get(".//RunCadence")))
     ref <- tibble(time = ymd_hms(get("./Time")), ref_spm = cadence)
-  } else if (ext == "fit") {
-    if (!requireNamespace("FITfileR", quietly = TRUE)) {
-      stop("Reading .fit needs FITfileR: install.packages('FITfileR', repos = c('https://grimbough.r-universe.dev', getOption('repos'))), or export TCX instead.")
-    }
-    rec <- FITfileR::records(FITfileR::readFitFile(path))
-    if (!is.data.frame(rec)) rec <- bind_rows(rec)
-    ref <- rec |> transmute(time = timestamp, ref_spm = as.numeric(cadence))
   } else {
-    ref <- read_csv(path, col_types = cols()) |> transmute(time = ymd_hms(time), ref_spm = as.numeric(cadence))
+    ref <- read_csv(path, col_types = cols(time = col_character())) |>
+      mutate(time = ymd_hms(time), ref_spm = as.numeric(cadence)) |>
+      select(time, ref_spm, any_of(c("speed", "distance", "heart_rate", "lat", "lon")))
   }
   ref |> filter(!is.na(time), !is.na(ref_spm))
 }

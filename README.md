@@ -272,10 +272,19 @@ smoothing delays) and reports bias, MAE, correlation and the median ratio
 Outputs: `<session>_strokes.png`, `_zoom.png` (20 s), `_spm.csv`,
 `_compare.png`.
 
-Reference formats: **TCX** (Garmin Connect / Strava export; `Cadence` or
-`RunCadence`), **CSV** with columns `time` (ISO 8601, UTC) and `cadence`,
-or **FIT** if the R package FITfileR is installed
-(`install.packages("FITfileR", repos = c("https://grimbough.r-universe.dev", getOption("repos")))`).
+Reference formats: **FIT** (converted by `scripts/fit_to_csv.py` with
+`fitdecode` in `.venv`; also usable alone:
+`.venv/bin/python scripts/fit_to_csv.py activity.fit`), **TCX** (`Cadence`
+or `RunCadence`), or **CSV** with columns `time` (ISO 8601, UTC) and
+`cadence`. Speed, distance, heart rate and position are kept when present.
+
+Our reference is an **Apple Watch with WorkOutDoors** (FIT export, sport
+"paddling", 1 record/s with cadence, speed, distance, heart rate, GPS).
+In a 70-min session without the Tag (`0926.fit`, 2026-11-17) its cadence
+was smooth and step-like, 30–60 spm (median 42), never 0; when the workout
+pauses, records stop rather than dropping to 0. A median near 42 is low for
+OC paddling, so whether it counts every stroke is one of the things the
+comparison should answer (see the ratio).
 
 Synthetic check (10 min, varying 55–80 spm, rotated Tag, reference clock
 4 s off): 576 strokes detected vs ~575 true; after alignment MAE 0.3 spm.
