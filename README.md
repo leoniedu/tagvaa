@@ -11,10 +11,10 @@ minute as "cadence" on an OC6 outrigger canoe.
 | MCU / radio module | RAK4630 (nRF52840 + SX1262) | Meshtastic variant |
 | Meshtastic variant | `variants/nrf52840/rak_wismeshtag` | [meshtastic/firmware @ 6d41e27](https://github.com/meshtastic/firmware/tree/6d41e279f1f51bd59f687b9d441c1bf47b1594fc/variants/nrf52840/rak_wismeshtag) |
 | Board JSON | `boards/wiscore_rak4631.json` (S140 v6.1.1, app at `0x26000`) | Meshtastic `boards/` |
-| Accelerometer | ST LIS2DH (I2C; address/WHO_AM_I checked in milestone 2) | RAK + Meshtastic docs |
+| Accelerometer | ST LIS2DH at I2C **0x19**, WHO_AM_I **0x33** (only device on the bus) | RAK + Meshtastic docs; verified M2 |
 | GNSS | AT6558R on UART1 (RX 15, TX 16) | Meshtastic variant |
 | Back button | per RAK: 1× reset, 2× = DFU/UF2 bootloader. **Not visible on our unit** (only one button found), so we enter the bootloader by software instead | [RAK quick start](https://docs.rakwireless.com/product-categories/meshtastic/wismesh-tag/quickstart/) |
-| Front button | user button, GPIO P0.09 (pull-up) | Meshtastic variant |
+| Front button | the one visible button; GPIO P0.09, active low (pull-up) | Meshtastic variant; verified M1 |
 | LEDs | green P1.03 (pin 35), blue P1.04 (pin 36), red = charger only | Meshtastic variant + RAK docs |
 
 ### Pins used
@@ -89,6 +89,9 @@ rebooted as soon as it had the whole file.
 Copy `firmware/<milestone>.uf2` onto it; the Tag reboots into the new
 firmware by itself.
 
+Shortcut when one of our firmwares is running: `scripts/flash.sh firmware/m3_csc.uf2`
+(sends `dfu`, waits for the drive, checks the SoftDevice, copies the file).
+
 The UF2 only writes the application area (from `0x26000`). The bootloader and
 SoftDevice are never touched, so stock firmware can always be restored by the
 same drag-and-drop.
@@ -148,8 +151,8 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 
 | # | Env / UF2 | What it does | Status |
 |---|---|---|---|
-| 1 | `m1_hello` | USB serial + LED blink | serial + `dfu` escape verified on hardware 2026-11-17; LEDs/button pending |
-| 2 | `m2_accel` | I2C scan, LIS2DH WHO_AM_I, x/y/z at 10 Hz | built, not yet tested |
+| 1 | `m1_hello` | USB serial + LED blink | ✅ verified 2026-11-17 (serial, both LEDs, button, `dfu` escape) |
+| 2 | `m2_accel` | I2C scan, LIS2DH WHO_AM_I, x/y/z at 10 Hz | ✅ verified 2026-11-17 (0x19, 0x33, \|a\| ≈ 0.99 g at rest) |
 | 3 | `m3_csc` | BLE CSC sensor, fixed 60 rpm (go/no-go) | built, not yet tested |
 | 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO, HR mode) + R script | built, not yet tested |
 | 5 | — | On-device stroke detector | after real data |
