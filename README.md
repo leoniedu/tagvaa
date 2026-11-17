@@ -70,7 +70,22 @@ Our unit shows only one button, so we use software entry:
 
 The Meshtastic CLI is installed in `.venv` (`pip install meshtastic`).
 
-A USB drive appears containing `CURRENT.UF2`, `INDEX.HTM`, `INFO_UF2.TXT`.
+A USB drive named **`RAK4631`** appears containing `CURRENT.UF2`,
+`INDEX.HTM`, `INFO_UF2.TXT`. Our unit's `INFO_UF2.TXT` (verified 2026-11-17):
+
+```
+UF2 Bootloader 0.4.3
+Model: WisBlock RAK4631 Board
+Board-ID: WisBlock-RAK4631-Board
+Date: May 20 2023
+SoftDevice: S140 6.1.1
+```
+
+No `Factory-Erase:` line, so a factory erase needs
+`Meshtastic_nRF52_factory_erase_v3_S140_6.1.0.uf2`, not
+`meshtastic_factory_erase.uf2`. macOS `cp` usually ends with
+`fcopyfile failed: Input/output error`: harmless, the bootloader
+rebooted as soon as it had the whole file.
 Copy `firmware/<milestone>.uf2` onto it; the Tag reboots into the new
 firmware by itself.
 
@@ -82,7 +97,9 @@ same drag-and-drop.
 
 Before the first flash, the stock config was exported with
 `meshtastic --export-config` to `firmware/backup/meshtastic-config-2.7.26.yaml`
-(not committed: contains channel keys). Restore after reverting with
+(not committed: contains channel keys). A full flash image from the
+bootloader is in `firmware/backup/CURRENT-before-m1.UF2`
+(sha256 `3b14385a…`). Restore after reverting with
 `meshtastic --configure firmware/backup/meshtastic-config-2.7.26.yaml`.
 
 ### One-time checks before the first flash
@@ -131,7 +148,7 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 
 | # | Env / UF2 | What it does | Status |
 |---|---|---|---|
-| 1 | `m1_hello` | USB serial + LED blink | built, not yet tested on hardware |
+| 1 | `m1_hello` | USB serial + LED blink | serial + `dfu` escape verified on hardware 2026-11-17; LEDs/button pending |
 | 2 | `m2_accel` | I2C scan, LIS2DH WHO_AM_I, x/y/z at 10 Hz | built, not yet tested |
 | 3 | `m3_csc` | BLE CSC sensor, fixed 60 rpm (go/no-go) | built, not yet tested |
 | 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO, HR mode) + R script | built, not yet tested |
