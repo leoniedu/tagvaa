@@ -3,6 +3,7 @@
 #include <Adafruit_TinyUSB.h>
 #include <Arduino.h>
 #include <bluefruit.h>
+#include <dfu_escape.h>
 
 constexpr uint16_t APPEARANCE_CADENCE_SENSOR = 0x0483;
 constexpr uint8_t CSC_FLAG_CRANK_DATA = 0x02;
@@ -118,7 +119,7 @@ void loop()
     Serial.printf("revs %u  event_time %u\n", crankRevs, lastCrankEventTime);
 
     digitalWrite(LED_GREEN, LED_STATE_ON); // short green flash per "stroke"
-    delay(50);
+    delayPolling(50);
     digitalWrite(LED_GREEN, !LED_STATE_ON);
-    delay(950);
+    delayPolling(950);
 }

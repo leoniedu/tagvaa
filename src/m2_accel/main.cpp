@@ -2,6 +2,7 @@
 #include <Adafruit_TinyUSB.h>
 #include <Arduino.h>
 #include <Wire.h>
+#include <dfu_escape.h>
 #include <lis2dh.h>
 
 LIS2DH accel;
@@ -50,7 +51,7 @@ void loop()
     if (!accelOk) {
         // Fast blink = error.
         digitalToggle(LED_GREEN);
-        delay(100);
+        delayPolling(100);
         return;
     }
     AccelSample s;
@@ -58,5 +59,5 @@ void loop()
         Serial.printf("%d,%d,%d\n", s.x_mg, s.y_mg, s.z_mg);
     }
     digitalToggle(LED_GREEN);
-    delay(100); // 10 Hz
+    delayPolling(100); // 10 Hz
 }

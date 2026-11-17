@@ -1,6 +1,7 @@
 // Milestone 1: USB serial "hello" + LED blink.
 #include <Arduino.h>
 #include <Adafruit_TinyUSB.h> // USB CDC serial; the include makes PlatformIO link the library
+#include <dfu_escape.h>
 
 uint32_t count = 0;
 
@@ -24,7 +25,8 @@ void loop()
     digitalWrite(LED_GREEN, phase ? LED_STATE_ON : !LED_STATE_ON);
     digitalWrite(LED_BLUE, phase ? !LED_STATE_ON : LED_STATE_ON);
 
-    Serial.printf("tick %lu  uptime %lu ms\n", (unsigned long)count, (unsigned long)millis());
+    Serial.printf("tick %lu  uptime %lu ms  button %s\n", (unsigned long)count, (unsigned long)millis(),
+                  digitalRead(PIN_BUTTON1) == LOW ? "PRESSED" : "up");
     count++;
-    delay(1000);
+    delayPolling(1000);
 }

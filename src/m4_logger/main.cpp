@@ -9,6 +9,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <bluefruit.h>
+#include <dfu_escape.h>
 #include <lis2dh.h>
 
 constexpr uint32_t SAMPLE_PERIOD_MS = 10; // 100 Hz
@@ -63,7 +64,7 @@ void setup()
         while (true) { // fast blink forever = accelerometer not found
             Serial.println("# ERROR: LIS2DH not found");
             digitalToggle(LED_GREEN);
-            delay(100);
+            delayPolling(100);
         }
     }
     accel.configure(LIS2DH::ODR_100HZ, true);
@@ -136,5 +137,5 @@ void loop()
     }
 
     digitalWrite(LED_GREEN, (now / 500) % 2 ? LED_STATE_ON : !LED_STATE_ON); // slow blink = running
-    delay(POLL_MS);
+    delayPolling(POLL_MS);
 }

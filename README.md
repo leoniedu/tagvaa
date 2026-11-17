@@ -13,7 +13,7 @@ minute as "cadence" on an OC6 outrigger canoe.
 | Board JSON | `boards/wiscore_rak4631.json` (S140 v6.1.1, app at `0x26000`) | Meshtastic `boards/` |
 | Accelerometer | ST LIS2DH (I2C; address/WHO_AM_I checked in milestone 2) | RAK + Meshtastic docs |
 | GNSS | AT6558R on UART1 (RX 15, TX 16) | Meshtastic variant |
-| Back button | 1× reset, **2× (double press) = DFU/UF2 bootloader** | [RAK quick start](https://docs.rakwireless.com/product-categories/meshtastic/wismesh-tag/quickstart/) |
+| Back button | per RAK: 1× reset, 2× = DFU/UF2 bootloader. **Not visible on our unit** (only one button found), so we enter the bootloader by software instead | [RAK quick start](https://docs.rakwireless.com/product-categories/meshtastic/wismesh-tag/quickstart/) |
 | Front button | user button, GPIO P0.09 (pull-up) | Meshtastic variant |
 | LEDs | green P1.03 (pin 35), blue P1.04 (pin 36), red = charger only | Meshtastic variant + RAK docs |
 
@@ -58,15 +58,32 @@ Adafruit core. All images start at `0x26000` and end below `0x44000`.
 
 ## Flashing (UF2 drag and drop)
 
-1. Connect the Tag with the magnetic USB cable.
-2. **Double-press the back button.** A USB drive appears containing
-   `CURRENT.UF2`, `INDEX.HTM`, `INFO_UF2.TXT`.
-3. Copy `firmware/<milestone>.uf2` onto that drive. It reboots
-   by itself into the new firmware.
+### Getting into the UF2 bootloader (no button needed)
+
+Our unit shows only one button, so we use software entry:
+
+| Tag is running | How |
+|---|---|
+| Stock Meshtastic | `.venv/bin/meshtastic --port /dev/cu.usbmodem* --enter-dfu` (Meshtastic calls `enterUf2Dfu()`; documented in [Meshtastic: entering bootloader mode](https://meshtastic.org/docs/getting-started/flashing-firmware/nrf52/entering-bootloader-mode/)) |
+| Any OC6 firmware here | type `dfu` + Enter in `pio device monitor`, or hold the front button 5 s (`lib/dfu_escape`) |
+| Neither works | RAK documents a double press of the reset ("back") button |
+
+The Meshtastic CLI is installed in `.venv` (`pip install meshtastic`).
+
+A USB drive appears containing `CURRENT.UF2`, `INDEX.HTM`, `INFO_UF2.TXT`.
+Copy `firmware/<milestone>.uf2` onto it; the Tag reboots into the new
+firmware by itself.
 
 The UF2 only writes the application area (from `0x26000`). The bootloader and
 SoftDevice are never touched, so stock firmware can always be restored by the
 same drag-and-drop.
+
+### Meshtastic config backup
+
+Before the first flash, the stock config was exported with
+`meshtastic --export-config` to `firmware/backup/meshtastic-config-2.7.26.yaml`
+(not committed: contains channel keys). Restore after reverting with
+`meshtastic --configure firmware/backup/meshtastic-config-2.7.26.yaml`.
 
 ### One-time checks before the first flash
 
@@ -101,7 +118,7 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 1. Use `firmware/stock/firmware-rak_wismeshtag-2.7.26.54e0d8d.uf2`, or the
    latest from <https://meshtastic.org/downloads>
    (`firmware-rak_wismeshtag-X.X.X.xxxxxxx.uf2` in the nRF52840 zip).
-2. Double-press the back button, drag the `.uf2` onto the drive.
+2. Enter the bootloader (type `dfu` in the serial monitor), drag the `.uf2` onto the drive.
 3. If Meshtastic misbehaves afterwards (corrupt settings from this
    firmware's BLE bond storage, which shares the flash filesystem area),
    do a factory erase as described in
