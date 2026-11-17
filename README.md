@@ -153,8 +153,8 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 |---|---|---|---|
 | 1 | `m1_hello` | USB serial + LED blink | ✅ verified 2026-11-17 (serial, both LEDs, button, `dfu` escape) |
 | 2 | `m2_accel` | I2C scan, LIS2DH WHO_AM_I, x/y/z at 10 Hz | ✅ verified 2026-11-17 (0x19, 0x33, \|a\| ≈ 0.99 g at rest) |
-| 3 | `m3_csc` | BLE CSC sensor, fixed 60 rpm (go/no-go) | ✅ Mac BLE check 2026-11-17 (60.0 rpm); iPhone + CS300 pending |
-| 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO, HR mode) + R script | built, not yet tested |
+| 3 | `m3_csc` | BLE CSC sensor, fixed 60 rpm (go/no-go) | ✅ **GO** 2026-11-17: CS300 shows 60 rpm |
+| 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO) + R script | ✅ Mac bench 2026-11-17: 30 s, 0 lost, 100.64 Hz, MTU 247; phone + boat pending |
 | 5 | — | On-device stroke detector | after real data |
 | 6 | — | Power management | later |
 
@@ -204,8 +204,11 @@ then on the CS300 add a cadence sensor: it should find "OC6 Stroke" and show
 ### 4 — 100 Hz logger (`m4_logger.uf2`)
 
 - Advertises as **OC6 Logger** with the Nordic UART Service.
-- LIS2DH at 100 Hz, ±4 g, high-resolution, FIFO in stream mode; the MCU
-  drains it every 50 ms.
+- LIS2DH at 100 Hz, ±4 g, FIFO in stream mode; the MCU drains it every 50 ms.
+- **Resolution: 8 mg steps.** HR mode is enabled, but the LIS2DH FIFO only
+  keeps 10 bits per axis (measured: every value a multiple of 8 mg, vs 2 mg
+  steps in M2 without FIFO). Noise at rest is ~4 mg sd, so the extra bits
+  would mostly be noise; strokes are expected in the 50–300 mg range.
 - Streaming starts when the phone subscribes to UART TX (notifications).
   Output, also mirrored to USB serial:
 
@@ -221,8 +224,10 @@ then on the CS300 add a cadence sensor: it should find "OC6 Stroke" and show
 - Requests MTU 247, 2M PHY and a 15 ms connection interval.
 - Phone recording: any app that connects to Nordic UART and saves received
   text works (e.g. Bluefruit Connect → UART, or nRF Toolbox UART); which
-  iPhone app exports most cleanly is still to be checked. Bench test from
-  the Mac: `.venv/bin/pio device monitor --raw --quiet | tee session.csv`.
+  iPhone app exports most cleanly is still to be checked.
+- From the Mac over BLE: `.venv/bin/python scripts/ble_log.py data/session.csv 60`.
+  Over USB: `.venv/bin/pio device monitor --raw --quiet | tee data/session.csv`.
+  `data/` is not committed.
 
 Analysis:
 
