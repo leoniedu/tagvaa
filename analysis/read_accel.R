@@ -1,4 +1,4 @@
-# Read an OC6 Logger CSV (milestone 4) and plot x/y/z and the magnitude.
+# Read a Paddle Logger CSV (milestone 4) and plot x/y/z and the magnitude.
 #
 # Usage:
 #   Rscript analysis/read_accel.R path/to/session.csv [output.png]
@@ -16,30 +16,71 @@ large_file_bytes <- 100e6
 
 data_pattern <- "-?\\d+,-?\\d+,-?\\d+,-?\\d+,-?\\d+$"
 
-# Bluefruit Connect UART export: "Timestamp,Mode,Data", one BLE packet per
-# quoted Data field, with the packet's trailing newline stripped. A line can
-# be cut across two packets; then one side of the cut is not a complete line,
-# and the two packets are joined without a newline.
+# Bluefruit Connect UART export (also written by scripts/ble_log.py):
+# "Timestamp,Mode,Data", one BLE packet per quoted Data field, with the
+# packet's trailing newline stripped. A line can be cut across packets, so
+# the stream is rebuilt packet by packet: a newline goes between two packets
+# only if the line rebuilt so far is complete and the next packet does not
+# start with the tail of a line.
+# Returns the lines plus a clock table pairing each packet's arrival time on
+# the phone (seconds since local midnight) with the t_ms of the last complete
+# sample received so far.
 unpack_bluefruit <- function(path) {
-  data <- read_csv(path, col_types = "ccc", trim_ws = FALSE) |>
-    filter(Mode == "RX") |>
-    pull(Data)
+  packets <- read_csv(path, col_types = "ccc", trim_ws = FALSE) |>
+    filter(Mode == "RX")
+  data <- packets$Data
   is_complete <- \(x) str_detect(x, str_c("^", data_pattern)) | str_starts(x, "#") | x == "seq,t_ms,x_mg,y_mg,z_mg"
+  has_newline <- str_detect(data, "\n")
   last_line <- str_extract(data, "[^\n]*$")
-  first_line <- str_extract(data, "^[^\n]*")
-  joined_cleanly <- is_complete(head(last_line, -1)) & is_complete(first_line[-1])
-  sep <- c(if_else(joined_cleanly, "\n", ""), "")
-  str_c(data, sep, collapse = "") |> str_split_1("\n")
+  starts_with_tail <- has_newline & !is_complete(str_extract(data, "^[^\n]*"))
+
+  n <- length(data)
+  sep <- character(n)       # separator placed before packet k
+  current <- character(n)   # last (possibly partial) line after packet k
+  for (k in seq_len(n)) {
+    if (k == 1) {
+      current[k] <- last_line[k]
+      next
+    }
+    sep[k] <- if (is_complete(current[k - 1]) && !starts_with_tail[k]) "\n" else ""
+    current[k] <- if (has_newline[k]) last_line[k] else str_c(if (sep[k] == "") current[k - 1] else "", data[k])
+  }
+  lines <- str_c(sep, data, collapse = "") |> str_split_1("\n")
+
+  clock <- tibble(
+    phone_s = period_to_seconds(hms(packets$Timestamp)),
+    t_ms = str_match(current, "^-?\\d+,(-?\\d+),-?\\d+,-?\\d+,-?\\d+$")[, 2] |> as.numeric()
+  ) |>
+    filter(!is.na(t_ms), !is.na(phone_s)) |>
+    distinct(t_ms, .keep_all = TRUE) |>
+    mutate(phone_s = phone_s + 86400 * cumsum(c(0, diff(phone_s) < -43200))) # past midnight
+  list(lines = lines, clock = clock)
 }
 
-read_accel <- function(path) {
+# Wall-clock time for every sample: a straight-line fit of phone arrival
+# time against the Tag's t_ms (absorbs clock drift; BLE latency adds a few
+# tens of ms of bias, irrelevant at 1 s resolution).
+add_wall_clock <- function(acc, clock, date, tz) {
+  fit <- lm(phone_s ~ t_ms, data = clock)
+  resid_ms <- 1000 * sd(residuals(fit))
+  message(sprintf("clock: %d packets, drift %+.0f ppm, residual sd %.0f ms", nrow(clock), 1e6 * (coef(fit)[[2]] * 1000 - 1), resid_ms))
+  midnight <- as.POSIXct(format(date), tz = tz)
+  acc |> mutate(time = midnight + predict(fit, newdata = acc))
+}
+
+# date: day of the recording (the export only has times of day); defaults to
+# the file's modification date. tz: the phone's time zone.
+read_accel <- function(path, date = NULL, tz = Sys.timezone()) {
+  clock <- NULL
   if (file.size(path) > large_file_bytes) {
     lines <- data.table::fread(path, sep = NULL, header = FALSE)[[1]]
   } else {
     lines <- read_lines(path)
   }
   if (length(lines) > 0 && lines[[1]] == "Timestamp,Mode,Data") {
-    lines <- unpack_bluefruit(path)
+    unpacked <- unpack_bluefruit(path)
+    lines <- unpacked$lines
+    clock <- unpacked$clock
   }
   rows <- str_extract(lines, data_pattern)
   rows <- rows[!is.na(rows)]
@@ -54,7 +95,7 @@ read_accel <- function(path) {
     acc <- read_csv(I(rows), col_names = c("seq", "t_ms", "x_mg", "y_mg", "z_mg"), col_types = "ddddd")
   }
 
-  acc |>
+  acc <- acc |>
     distinct(seq, .keep_all = TRUE) |>
     arrange(seq) |>
     mutate(
@@ -62,6 +103,12 @@ read_accel <- function(path) {
       across(c(x_mg, y_mg, z_mg), \(v) v / 1000, .names = "{str_remove(.col, '_mg')}_g"),
       mag_g = sqrt(x_g^2 + y_g^2 + z_g^2)
     )
+
+  if (!is.null(clock) && nrow(clock) >= 10) {
+    date <- date %||% as.Date(file.mtime(path), tz = tz)
+    acc <- add_wall_clock(acc, clock, as.Date(date), tz)
+  }
+  acc
 }
 
 # Gaps in seq mean lost samples (BLE drops or FIFO overruns).

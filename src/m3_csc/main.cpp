@@ -77,10 +77,10 @@ void setup()
     while (!Serial && millis() < 3000) {
         delay(10);
     }
-    Serial.println("OC6 Stroke: milestone 3 (CSC, fixed 60 rpm)");
+    Serial.println("Paddle Stroke: milestone 3 (CSC, fixed 60 rpm)");
 
     Bluefruit.begin();
-    Bluefruit.setName("OC6 Stroke");
+    Bluefruit.setName("Paddle Stroke");
     Bluefruit.setAppearance(APPEARANCE_CADENCE_SENSOR);
     Bluefruit.setTxPower(4); // dBm; max for nRF52840 is 8
     Bluefruit.autoConnLed(true); // blue LED blinks while advertising, solid when connected
@@ -88,7 +88,7 @@ void setup()
     Bluefruit.Periph.setDisconnectCallback(onDisconnect);
 
     deviceInfo.setManufacturer("DIY");
-    deviceInfo.setModel("OC6 Stroke (WisMesh Tag)");
+    deviceInfo.setModel("Paddle Stroke (WisMesh Tag)");
     deviceInfo.begin();
 
     battery.begin();
@@ -96,7 +96,7 @@ void setup()
 
     setupCsc();
     startAdvertising();
-    Serial.println("advertising as \"OC6 Stroke\"");
+    Serial.println("advertising as \"Paddle Stroke\"");
 }
 
 void loop()

@@ -1,8 +1,12 @@
-# OC6 Stroke — WisMesh Tag as a BLE stroke-rate sensor
+# Paddle Stroke — WisMesh Tag as a BLE stroke-rate sensor
 
 Custom firmware for the **RAK WisMesh Tag** that turns it into a Bluetooth LE
 Cycling Speed & Cadence sensor, so a COOSPO CS300 shows paddle strokes per
-minute as "cadence" on an OC6 outrigger canoe.
+minute as "cadence" on an outrigger canoe (first tests in an OC1, target OC6).
+
+BLE names: **Paddle Stroke** (cadence sensor, M3/M5) and **Paddle Logger**
+(raw data logger, M4). Renamed from "OC6 …" on 2026-11-17; a phone or CS300
+that paired earlier may still show the old name until it is forgotten.
 
 ## Hardware facts (verified)
 
@@ -65,7 +69,7 @@ Our unit shows only one button, so we use software entry:
 | Tag is running | How |
 |---|---|
 | Stock Meshtastic | `.venv/bin/meshtastic --port /dev/cu.usbmodem* --enter-dfu` (Meshtastic calls `enterUf2Dfu()`; documented in [Meshtastic: entering bootloader mode](https://meshtastic.org/docs/getting-started/flashing-firmware/nrf52/entering-bootloader-mode/)) |
-| Any OC6 firmware here | type `dfu` + Enter in `pio device monitor`, or hold the front button 5 s (`lib/dfu_escape`) |
+| Any firmware here | type `dfu` + Enter in `pio device monitor`, or hold the front button 5 s (`lib/dfu_escape`) |
 | Neither works | RAK documents a double press of the reset ("back") button |
 
 The Meshtastic CLI is installed in `.venv` (`pip install meshtastic`).
@@ -164,7 +168,7 @@ monitor, or hold the front button 5 s.
 
 ### 1 — Hello world (`m1_hello.uf2`)
 
-Expect `OC6 Stroke: hello from the WisMesh Tag`, then `tick N  uptime … ms`
+Expect `Paddle Stroke: hello from the WisMesh Tag`, then `tick N  uptime … ms`
 once per second; green and blue LEDs alternate every second.
 Confirms toolchain, UF2 layout, USB serial and LED pins.
 
@@ -181,7 +185,7 @@ Settings: ±4 g, high-resolution 12-bit (2 mg/digit), block data update.
 
 ### 3 — BLE cadence sensor, fixed 60 rpm (`m3_csc.uf2`)
 
-- Advertises as **OC6 Stroke**, appearance 0x0483 (cadence sensor),
+- Advertises as **Paddle Stroke**, appearance 0x0483 (cadence sensor),
   service 0x1816.
 - CSC Measurement 0x2A5B (notify): `02 RR RR TT TT` — flags 0x02, uint16
   crank revolutions, uint16 last event time (1/1024 s), little-endian.
@@ -194,16 +198,16 @@ Settings: ±4 g, high-resolution 12-bit (2 mg/digit), block data update.
 Mac check (Python `bleak` in `.venv`): `.venv/bin/python scripts/csc_check.py`
 scans, reads CSC Feature and decodes 5 notifications into rpm.
 
-Test with nRF Connect (iPhone): scan → OC6 Stroke shows the CSC service
+Test with nRF Connect (iPhone): scan → Paddle Stroke shows the CSC service
 in the advertisement → connect → Cycling Speed and Cadence → enable
 notifications on CSC Measurement: a 5-byte value every second, revs and
 time increasing (time by 0x0400). Read CSC Feature = `0x0002`. Disconnect,
-then on the CS300 add a cadence sensor: it should find "OC6 Stroke" and show
+then on the CS300 add a cadence sensor: it should find "Paddle Stroke" and show
 **60 rpm**.
 
 ### 4 — 100 Hz logger (`m4_logger.uf2`)
 
-- Advertises as **OC6 Logger** with the Nordic UART Service.
+- Advertises as **Paddle Logger** with the Nordic UART Service.
 - LIS2DH at 100 Hz, ±4 g, FIFO in stream mode; the MCU drains it every 50 ms.
 - **Resolution: 8 mg steps.** HR mode is enabled, but the LIS2DH FIFO only
   keeps 10 bits per axis (measured: every value a multiple of 8 mg, vs 2 mg
@@ -213,7 +217,7 @@ then on the CS300 add a cadence sensor: it should find "OC6 Stroke" and show
   Output, also mirrored to USB serial:
 
   ```
-  # OC6 Logger, 100 Hz, +-4 g, uptime 12345 ms
+  # Paddle Logger, 100 Hz, +-4 g, uptime 12345 ms
   seq,t_ms,x_mg,y_mg,z_mg
   0,12350,-12,8,1004
   ```
@@ -236,15 +240,48 @@ then on the CS300 add a cadence sensor: it should find "OC6 Stroke" and show
 Analysis:
 
 ```sh
-Rscript analysis/read_accel.R session.csv          # writes session.png
+Rscript analysis/read_accel.R data/session.csv          # axes + magnitude plot
+Rscript analysis/stroke_rate.R data/session.csv [watch.tcx|.fit|.csv] [YYYY-MM-DD]
 ```
 
-or `source("analysis/read_accel.R")`, then `acc <- read_accel("session.csv")`,
-`check_gaps(acc)`, `plot_accel(acc)`. It skips non-data lines, strips
-app timestamp prefixes, removes duplicates after reconnects, reports lost
-samples and the measured sample rate, and plots x, y, z and magnitude (g).
-Files over 100 MB are read with data.table.
+`read_accel.R` skips non-data lines, rejoins lines split across BLE packets
+(Bluefruit Connect export or `scripts/ble_log.py`), removes duplicates after
+reconnects, reports lost samples and the measured sample rate, and plots x,
+y, z and magnitude (g). With a timestamped export it adds a wall-clock
+`time` per sample (straight-line fit of phone arrival time vs the Tag's
+`t_ms`; the date defaults to the file's modification date, override with the
+third argument). Files over 100 MB are read with data.table.
 
-Test: record ~1 min with the Tag still, then ~1 min while shaking it at
-roughly 1 Hz; check the gap report (target < 1 % lost) and that the plot
-shows ~1 g still and a clear 1 Hz pattern.
+`stroke_rate.R` is the prototype of the on-device detector (milestone 5),
+using only causal filters that port easily to C:
+
+1. gravity = EMA low-pass per axis (τ 2 s); dynamic = raw − gravity
+2. vertical = dynamic · ĝ; horizontal = dynamic − vertical
+3. surge axis = first principal component of the horizontal part (offline
+   for now), sign chosen so the drive is positive
+4. band-pass 0.5–2 Hz (two cascaded RBJ biquads)
+5. peaks above max(20 mg, 0.5 × running mean |signal|), ≥ 0.6 s apart
+6. spm = 60 / interval, plausible 30–110, rolling median of 5 strokes,
+   one value per second (held 5 s, then blank)
+
+With a reference file it aligns the Tag estimate to the watch cadence
+(shift with the smallest mean absolute difference within ±60 s, pauses
+counting as 0 spm; the shift includes clock offset and both devices'
+smoothing delays) and reports bias, MAE, correlation and the median ratio
+(a ratio near 0.5 or 2 would mean one device counts one side only).
+Outputs: `<session>_strokes.png`, `_zoom.png` (20 s), `_spm.csv`,
+`_compare.png`.
+
+Reference formats: **TCX** (Garmin Connect / Strava export; `Cadence` or
+`RunCadence`), **CSV** with columns `time` (ISO 8601, UTC) and `cadence`,
+or **FIT** if the R package FITfileR is installed
+(`install.packages("FITfileR", repos = c("https://grimbough.r-universe.dev", getOption("repos")))`).
+
+Synthetic check (10 min, varying 55–80 spm, rotated Tag, reference clock
+4 s off): 576 strokes detected vs ~575 true; after alignment MAE 0.3 spm.
+
+First water test (OC1): Tag rigidly fixed to the hull, phone (Bluefruit
+Connect, recording) and watch (paddling activity with stroke rate) both
+running; ~30 s still at start and end; 10+ min including steady pieces at
+different rates. Export the Bluefruit log and the watch activity (TCX or
+FIT), then run `stroke_rate.R` with both.

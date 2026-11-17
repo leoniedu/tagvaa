@@ -1,4 +1,4 @@
-"""Scan for "OC6 Stroke", read CSC Feature, print 5 CSC Measurement notifications with computed rpm."""
+"""Scan for "Paddle Stroke", read CSC Feature, print 5 CSC Measurement notifications with computed rpm."""
 import asyncio
 import struct
 
@@ -13,10 +13,10 @@ async def main():
     dev, adv = None, None
     found = await BleakScanner.discover(timeout=10, return_adv=True)
     for d, a in found.values():
-        if a.local_name == "OC6 Stroke":
+        if a.local_name == "Paddle Stroke":
             dev, adv = d, a
     if dev is None:
-        print("OC6 Stroke not found")
+        print("Paddle Stroke not found")
         return
     print(f"found {adv.local_name} rssi {adv.rssi} dBm, advertised services {adv.service_uuids}")
 

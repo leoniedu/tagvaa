@@ -55,7 +55,7 @@ void setup()
     while (!Serial && millis() < 2000) {
         delay(10);
     }
-    Serial.println("# OC6 Stroke: milestone 4 (100 Hz logger)");
+    Serial.println("# Paddle Stroke: milestone 4 (100 Hz logger)");
 
     delay(50);
     Wire.begin();
@@ -71,14 +71,14 @@ void setup()
 
     Bluefruit.configPrphBandwidth(BANDWIDTH_MAX); // MTU up to 247; must precede begin()
     Bluefruit.begin();
-    Bluefruit.setName("OC6 Logger");
+    Bluefruit.setName("Paddle Logger");
     Bluefruit.setTxPower(4);
     Bluefruit.autoConnLed(true);
     Bluefruit.Periph.setConnectCallback(onConnect);
     Bluefruit.Periph.setDisconnectCallback(onDisconnect);
 
     deviceInfo.setManufacturer("DIY");
-    deviceInfo.setModel("OC6 Logger (WisMesh Tag)");
+    deviceInfo.setModel("Paddle Logger (WisMesh Tag)");
     deviceInfo.begin();
     bleuart.begin();
 
@@ -91,7 +91,7 @@ void setup()
     Bluefruit.Advertising.setFastTimeout(30);
     Bluefruit.Advertising.start(0);
 
-    Serial.println("# advertising as \"OC6 Logger\"");
+    Serial.println("# advertising as \"Paddle Logger\"");
     Serial.println("seq,t_ms,x_mg,y_mg,z_mg");
 }
 
@@ -102,7 +102,7 @@ void loop()
     if (wantStream && !streaming) {
         streaming = true;
         char hdr[96];
-        snprintf(hdr, sizeof hdr, "# OC6 Logger, 100 Hz, +-4 g, uptime %lu ms\nseq,t_ms,x_mg,y_mg,z_mg\n",
+        snprintf(hdr, sizeof hdr, "# Paddle Logger, 100 Hz, +-4 g, uptime %lu ms\nseq,t_ms,x_mg,y_mg,z_mg\n",
                  (unsigned long)millis());
         output(hdr);
     } else if (!wantStream) {

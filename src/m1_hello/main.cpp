@@ -15,7 +15,7 @@ void setup()
     while (!Serial && millis() < 3000) {
         delay(10);
     }
-    Serial.println("OC6 Stroke: hello from the WisMesh Tag");
+    Serial.println("Paddle Stroke: hello from the WisMesh Tag");
 }
 
 void loop()
