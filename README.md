@@ -287,8 +287,10 @@ or `RunCadence`), or **CSV** with columns `time` (ISO 8601, UTC) and
 
 Our reference is an **Apple Watch with WorkOutDoors** (FIT export, sport
 "paddling", 1 record/s with cadence, speed, distance, heart rate, GPS).
-**Open question: does the FIT cadence count every stroke?** The app
-showed ~85/min while the file says ~42 (median over a 70-min session
+**Does the FIT cadence count every stroke?** Paddler's experience: typical
+OC1 stroke rate is ~50/min and the WorkOutDoors display (~85) double
+counts, i.e. the file's ~42 is closer to the real rate; to be confirmed by
+the Tag. The app showed ~85/min while the file says ~42 (median over a 70-min session
 without the Tag, `0926.fit`, 2026-11-17; smooth and step-like, never 0;
 records stop when the workout pauses). Distance per stroke doesn't settle
 it: at 5.9 km/h → 2.4 m (42) or 1.2 m (85); at 8.7 km/h → 3.4 m or 1.7 m.
