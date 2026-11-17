@@ -139,12 +139,17 @@ rate_per_second <- function(strokes, acc, hold_s = 5) {
 }
 
 # Reference cadence (strokes/min) from a watch: .fit (converted with
-# scripts/fit_to_csv.py in the project venv, or FITfileR if installed),
-# .tcx, or .csv with columns time (ISO 8601) and cadence. Extra columns
-# (speed, distance, heart_rate, lat, lon) are kept when present.
-read_reference <- function(path) {
+# scripts/fit_to_csv.py in the project venv), .tcx, or .csv with columns
+# time (ISO 8601) and cadence. Extra columns (speed, distance, heart_rate,
+# lat, lon) are kept when present.
+# FIT stores cadence in cycles/min (one cycle = left + right stroke, as for
+# running), so FIT cadence is multiplied by fit_strokes_per_cycle (2):
+# WorkOutDoors shows ~85 strokes/min where its FIT file says ~42.
+read_reference <- function(path, fit_strokes_per_cycle = 2) {
   ext <- tolower(tools::file_ext(path))
+  scale <- 1
   if (ext == "fit") {
+    scale <- fit_strokes_per_cycle
     csv <- tempfile(fileext = ".csv")
     py <- file.path(project_dir, ".venv", "bin", "python")
     status <- system2(py, c(file.path(project_dir, "scripts", "fit_to_csv.py"), shQuote(path), shQuote(csv)), stdout = FALSE)
@@ -163,7 +168,9 @@ read_reference <- function(path) {
       mutate(time = ymd_hms(time), ref_spm = as.numeric(cadence)) |>
       select(time, ref_spm, any_of(c("speed", "distance", "heart_rate", "lat", "lon")))
   }
-  ref |> filter(!is.na(time), !is.na(ref_spm))
+  ref |>
+    filter(!is.na(time), !is.na(ref_spm)) |>
+    mutate(ref_spm = ref_spm * scale)
 }
 
 # Aligns estimate and reference to whole seconds and finds the shift of the
