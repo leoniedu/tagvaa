@@ -139,8 +139,8 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 | 6 | — | Power management | later |
 
 Serial monitor (any milestone): `.venv/bin/pio device monitor`
-(115200 baud, Ctrl-C quits). Back to the bootloader: double-press the back
-button.
+(115200 baud, Ctrl-C quits). Back to the bootloader: type `dfu` + Enter in the
+monitor, or hold the front button 5 s.
 
 ### 1 — Hello world (`m1_hello.uf2`)
 
