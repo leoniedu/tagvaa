@@ -19,8 +19,21 @@ LIS2DH accel;
 BLEUart bleuart;
 BLEDis deviceInfo;
 
+// Two connections, so a device that auto-reconnects (e.g. a bike computer
+// paired with this Tag earlier) can't lock the phone out.
+constexpr uint8_t MAX_CONNECTIONS = 2;
+
 uint32_t seq = 0;
-bool streaming = false;
+bool streaming[MAX_CONNECTIONS] = {false};
+
+uint8_t connectionCount()
+{
+    uint8_t n = 0;
+    for (uint16_t h = 0; h < MAX_CONNECTIONS; h++) {
+        n += Bluefruit.connected(h);
+    }
+    return n;
+}
 
 void onConnect(uint16_t conn_hdl)
 {
@@ -30,18 +43,32 @@ void onConnect(uint16_t conn_hdl)
     conn->requestDataLengthUpdate();
     conn->requestMtuExchange(247);
     conn->requestConnectionParameter(12); // 12 x 1.25 ms = 15 ms
-    Serial.println("# BLE connected");
+
+    char peer[32] = {0};
+    conn->getPeerName(peer, sizeof peer);
+    Serial.printf("# BLE connected [%u] %s\n", conn_hdl, peer);
+
+    // Advertising stops on connect; keep it going while a slot is free.
+    if (connectionCount() < MAX_CONNECTIONS) {
+        Bluefruit.Advertising.start(0);
+    }
 }
 
 void onDisconnect(uint16_t conn_hdl, uint8_t reason)
 {
-    Serial.printf("# BLE disconnected, reason 0x%02X\n", reason);
+    if (conn_hdl < MAX_CONNECTIONS) {
+        streaming[conn_hdl] = false;
+    }
+    Serial.printf("# BLE disconnected [%u], reason 0x%02X\n", conn_hdl, reason);
 }
 
+// Sends text to every connection that subscribed to the UART, and to USB serial.
 void output(const char *text)
 {
-    if (streaming) {
-        bleuart.write((const uint8_t *)text, strlen(text));
+    for (uint16_t h = 0; h < MAX_CONNECTIONS; h++) {
+        if (streaming[h]) {
+            bleuart.write(h, (const uint8_t *)text, strlen(text));
+        }
     }
     if (Serial) {
         Serial.print(text);
@@ -55,7 +82,7 @@ void setup()
     while (!Serial && millis() < 2000) {
         delay(10);
     }
-    Serial.println("# Paddle Stroke: milestone 4 (100 Hz logger)");
+    Serial.println("# Paddle Logger: milestone 4 (100 Hz logger)");
 
     delay(50);
     Wire.begin();
@@ -70,7 +97,7 @@ void setup()
     accel.configure(LIS2DH::ODR_100HZ, true);
 
     Bluefruit.configPrphBandwidth(BANDWIDTH_MAX); // MTU up to 247; must precede begin()
-    Bluefruit.begin();
+    Bluefruit.begin(MAX_CONNECTIONS, 0);
     Bluefruit.setName("Paddle Logger");
     Bluefruit.setTxPower(4);
     Bluefruit.autoConnLed(true);
@@ -97,16 +124,19 @@ void setup()
 
 void loop()
 {
-    // Start streaming when the phone subscribes to the UART TX characteristic.
-    bool wantStream = Bluefruit.connected() && bleuart.notifyEnabled();
-    if (wantStream && !streaming) {
-        streaming = true;
-        char hdr[96];
-        snprintf(hdr, sizeof hdr, "# Paddle Logger, 100 Hz, +-4 g, uptime %lu ms\nseq,t_ms,x_mg,y_mg,z_mg\n",
-                 (unsigned long)millis());
-        output(hdr);
-    } else if (!wantStream) {
-        streaming = false;
+    // Start streaming to a connection when it subscribes to the UART TX characteristic.
+    for (uint16_t h = 0; h < MAX_CONNECTIONS; h++) {
+        bool want = Bluefruit.connected(h) && bleuart.notifyEnabled(h);
+        if (want && !streaming[h]) {
+            streaming[h] = true;
+            char hdr[96];
+            snprintf(hdr, sizeof hdr, "# Paddle Logger, 100 Hz, +-4 g, uptime %lu ms\nseq,t_ms,x_mg,y_mg,z_mg\n",
+                     (unsigned long)millis());
+            bleuart.write(h, (const uint8_t *)hdr, strlen(hdr));
+            Serial.printf("# streaming to [%u]\n", h);
+        } else if (!want) {
+            streaming[h] = false;
+        }
     }
 
     uint32_t now = millis();

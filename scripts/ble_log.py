@@ -13,13 +13,19 @@ from datetime import datetime
 
 from bleak import BleakClient, BleakScanner
 
+NUS_SERVICE = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
 NUS_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"  # notifications from the Tag
 
 
 async def main(path, seconds):
-    dev = await BleakScanner.find_device_by_name("Paddle Logger", timeout=15)
+    # Match the advertised name or the UART service: macOS may show a cached
+    # older name for the Tag.
+    dev = await BleakScanner.find_device_by_filter(
+        lambda d, adv: adv.local_name == "Paddle Logger" or NUS_SERVICE in adv.service_uuids, timeout=15
+    )
     if dev is None:
         sys.exit("Paddle Logger not found")
+    print(f"found {dev.name} ({dev.address})")
     with open(path, "w", newline="") as f:
         out = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
         out.writerow(["Timestamp", "Mode", "Data"])

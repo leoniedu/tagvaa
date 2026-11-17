@@ -226,6 +226,11 @@ then on the CS300 add a cadence sensor: it should find "Paddle Stroke" and show
   `t_ms` the device uptime (for aligning with other recordings). `#` lines
   are comments, including `# FIFO overrun …`.
 - Requests MTU 247, 2M PHY and a 15 ms connection interval.
+- Accepts **two connections** and keeps advertising while a slot is free:
+  a device that auto-reconnects to the Tag's address (seen once right after
+  boot, probably a phone or the CS300 paired as "OC6 Stroke") can't lock
+  out the recorder. Each subscriber gets its own header; USB serial logs
+  `# BLE connected [n] <peer>` / `# streaming to [n]`.
 - Phone recording (verified 2026-11-17, iPhone): **Bluefruit Connect** →
   connect (the phone may show the Tag's old Meshtastic name, e.g.
   `Skei_c129`; if connecting fails, Settings → Bluetooth → Forget This
@@ -233,7 +238,9 @@ then on the CS300 add a cadence sensor: it should find "Paddle Stroke" and show
   `Timestamp,Mode,Data` with one BLE packet per row; `read_accel()` detects
   it and rejoins lines split across packets. First test: 94.5 s, 0 lost,
   100.61 Hz.
-- From the Mac over BLE: `.venv/bin/python scripts/ble_log.py data/session.csv 60`.
+- From the Mac over BLE: `.venv/bin/python scripts/ble_log.py data/session.csv 60`
+  (finds the Tag by name or by the UART service, since macOS may show a
+  cached old name).
   Over USB: `.venv/bin/pio device monitor --raw --quiet | tee data/session.csv`.
   `data/` is not committed.
 
