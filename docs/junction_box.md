@@ -110,9 +110,8 @@ Battery: one 18650 (≈3 Ah) gives about 4 days of darkness now and about
 1. **Current draw.** Put a USB power meter between charger and Tag once its
    battery is full: the reading is roughly the running current. Do it with
    the current logger, then with a test build that holds `PIN_3V3_EN` LOW.
-2. **Is the accelerometer on the switched 3.3 V rail?** The same test build
-   shows whether the LIS2DH still answers with the rail off. If it does, M6
-   can simply switch the rail (and GNSS) off.
-3. **Battery voltage over a session.** Add the Tag's battery voltage (ADC
-   pin 5, ×1.73 per Meshtastic) to the logger output as a `#` line once a
-   minute, to see real drain.
+2. ~~Is the accelerometer on the switched 3.3 V rail?~~ **No** (`t_rail`,
+   2026-11-17): the GNSS is on it, the LIS2DH is not. M6 can switch the
+   rail (and GNSS) off.
+3. **Battery voltage over a session.** Done: the logger writes
+   `# battery t_ms=… mv=…` once a minute; `read_battery()` in R.

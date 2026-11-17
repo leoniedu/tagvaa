@@ -158,11 +158,11 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 | 1 | `m1_hello` | USB serial + LED blink | ✅ verified 2026-11-17 (serial, both LEDs, button, `dfu` escape) |
 | 2 | `m2_accel` | I2C scan, LIS2DH WHO_AM_I, x/y/z at 10 Hz | ✅ verified 2026-11-17 (0x19, 0x33, \|a\| ≈ 0.99 g at rest) |
 | 3 | `m3_csc` | BLE CSC sensor, fixed 60 rpm (go/no-go) | ✅ **GO** 2026-11-17: CS300 shows 60 rpm |
-| 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO) + R script | ✅ 2026-11-17: Mac and iPhone (Bluefruit Connect), 0 lost, ~100.6 Hz; boat session pending |
+| 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO) + battery lines + R script | ✅ 2026-11-17: Mac and iPhone (Bluefruit Connect), 0 lost, ~100.6 Hz; boat session pending |
 | 5 | — | On-device stroke detector | after real data |
 | 6 | — | Power management | later |
 | — | `docs/junction_box.md` | Sidequest: solar + battery junction box | paper design |
-| T | `t_rail` | Test: what is on the switched 3.3 V rail (accelerometer? GNSS?), current with rail on/off | built, not yet run |
+| T | `t_rail` | Test: what is on the switched 3.3 V rail | ✅ run 2026-11-17: GNSS on the rail, accelerometer not |
 
 Serial monitor (any milestone): `.venv/bin/pio device monitor`
 (115200 baud, Ctrl-C quits). Back to the bootloader: type `dfu` + Enter in the
@@ -178,6 +178,14 @@ bytes the GNSS sends on Serial1 (9600 baud) in 3 s, and the battery voltage.
 Then it toggles the rail every 30 s (green LED = rail on) so a USB power
 meter shows the current difference; the Tag battery should be full so
 charging doesn't mask it.
+
+Result (2026-11-17, indoors): rail OFF → GNSS sends 0 bytes, rail ON → it
+boots (`$GPTXT … MA=CASIC`, `IC=AT6558R-5N-…`) and streams NMEA at 9600
+baud. The LIS2DH (0x19) answers with normal readings with the rail on and
+off, and the I2C lines stay high, so the accelerometer and its pull-ups
+are on the always-on supply. Milestone 6 can switch GNSS off with
+`PIN_3V3_EN` LOW without losing the stroke sensor. Current difference not
+yet measured (needs a USB power meter).
 
 ### 1 — Hello world (`m1_hello.uf2`)
 
