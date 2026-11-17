@@ -1,4 +1,4 @@
-# PlatformIO post-build step: firmware.hex -> firmware.uf2 (nRF52840 family 0xADA52840).
+# PlatformIO post-build step: firmware.hex -> firmware/<env>.uf2 (nRF52840 family 0xADA52840).
 # Uses uf2conv.py shipped with the Adafruit nRF52 core.
 import os
 
@@ -9,7 +9,9 @@ UF2_FAMILY = "0xADA52840"
 
 def make_uf2(source, target, env):
     hex_path = str(target[0])
-    uf2_path = os.path.splitext(hex_path)[0] + ".uf2"
+    out_dir = os.path.join(env.subst("$PROJECT_DIR"), "firmware")
+    os.makedirs(out_dir, exist_ok=True)
+    uf2_path = os.path.join(out_dir, env.subst("$PIOENV") + ".uf2")
     framework = env.PioPlatform().get_package_dir("framework-arduinoadafruitnrf52")
     uf2conv = os.path.join(framework, "tools", "uf2conv", "uf2conv.py")
     env.Execute(f'"$PYTHONEXE" -W ignore::SyntaxWarning "{uf2conv}" -f {UF2_FAMILY} -c -o "{uf2_path}" "{hex_path}"')

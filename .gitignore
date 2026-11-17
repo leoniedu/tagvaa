@@ -1,5 +1,5 @@
 .pio/
 .venv/
 .vscode/
-*.uf2
-!docs/*.uf2
+firmware/
+*.png

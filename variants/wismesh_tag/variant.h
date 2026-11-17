@@ -25,6 +25,8 @@ extern "C" {
 #define PIN_LED2 (36)  // P1.04 blue
 #define LED_GREEN PIN_LED1
 #define LED_BLUE PIN_LED2 // Bluefruit blinks this while advertising
+#define LED_BUILTIN PIN_LED1 // the core flashes this during internal-flash writes
+#define LED_CONN PIN_LED2
 #define LED_STATE_ON 1
 
 // Front user button (the back button is reset / DFU, not a GPIO)
