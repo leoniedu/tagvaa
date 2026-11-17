@@ -16,11 +16,30 @@ large_file_bytes <- 100e6
 
 data_pattern <- "-?\\d+,-?\\d+,-?\\d+,-?\\d+,-?\\d+$"
 
+# Bluefruit Connect UART export: "Timestamp,Mode,Data", one BLE packet per
+# quoted Data field, with the packet's trailing newline stripped. A line can
+# be cut across two packets; then one side of the cut is not a complete line,
+# and the two packets are joined without a newline.
+unpack_bluefruit <- function(path) {
+  data <- read_csv(path, col_types = "ccc", trim_ws = FALSE) |>
+    filter(Mode == "RX") |>
+    pull(Data)
+  is_complete <- \(x) str_detect(x, str_c("^", data_pattern)) | str_starts(x, "#") | x == "seq,t_ms,x_mg,y_mg,z_mg"
+  last_line <- str_extract(data, "[^\n]*$")
+  first_line <- str_extract(data, "^[^\n]*")
+  joined_cleanly <- is_complete(head(last_line, -1)) & is_complete(first_line[-1])
+  sep <- c(if_else(joined_cleanly, "\n", ""), "")
+  str_c(data, sep, collapse = "") |> str_split_1("\n")
+}
+
 read_accel <- function(path) {
   if (file.size(path) > large_file_bytes) {
     lines <- data.table::fread(path, sep = NULL, header = FALSE)[[1]]
   } else {
     lines <- read_lines(path)
+  }
+  if (length(lines) > 0 && lines[[1]] == "Timestamp,Mode,Data") {
+    lines <- unpack_bluefruit(path)
   }
   rows <- str_extract(lines, data_pattern)
   rows <- rows[!is.na(rows)]

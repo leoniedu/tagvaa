@@ -154,7 +154,7 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 | 1 | `m1_hello` | USB serial + LED blink | ✅ verified 2026-11-17 (serial, both LEDs, button, `dfu` escape) |
 | 2 | `m2_accel` | I2C scan, LIS2DH WHO_AM_I, x/y/z at 10 Hz | ✅ verified 2026-11-17 (0x19, 0x33, \|a\| ≈ 0.99 g at rest) |
 | 3 | `m3_csc` | BLE CSC sensor, fixed 60 rpm (go/no-go) | ✅ **GO** 2026-11-17: CS300 shows 60 rpm |
-| 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO) + R script | ✅ Mac bench 2026-11-17: 30 s, 0 lost, 100.64 Hz, MTU 247; phone + boat pending |
+| 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO) + R script | ✅ 2026-11-17: Mac and iPhone (Bluefruit Connect), 0 lost, ~100.6 Hz; boat session pending |
 | 5 | — | On-device stroke detector | after real data |
 | 6 | — | Power management | later |
 
@@ -222,9 +222,13 @@ then on the CS300 add a cadence sensor: it should find "OC6 Stroke" and show
   `t_ms` the device uptime (for aligning with other recordings). `#` lines
   are comments, including `# FIFO overrun …`.
 - Requests MTU 247, 2M PHY and a 15 ms connection interval.
-- Phone recording: any app that connects to Nordic UART and saves received
-  text works (e.g. Bluefruit Connect → UART, or nRF Toolbox UART); which
-  iPhone app exports most cleanly is still to be checked.
+- Phone recording (verified 2026-11-17, iPhone): **Bluefruit Connect** →
+  connect (the phone may show the Tag's old Meshtastic name, e.g.
+  `Skei_c129`; if connecting fails, Settings → Bluetooth → Forget This
+  Device) → UART → record → export as CSV/text. The export is
+  `Timestamp,Mode,Data` with one BLE packet per row; `read_accel()` detects
+  it and rejoins lines split across packets. First test: 94.5 s, 0 lost,
+  100.61 Hz.
 - From the Mac over BLE: `.venv/bin/python scripts/ble_log.py data/session.csv 60`.
   Over USB: `.venv/bin/pio device monitor --raw --quiet | tee data/session.csv`.
   `data/` is not committed.
