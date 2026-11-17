@@ -142,10 +142,10 @@ rate_per_second <- function(strokes, acc, hold_s = 5) {
 # scripts/fit_to_csv.py in the project venv), .tcx, or .csv with columns
 # time (ISO 8601) and cadence. Extra columns (speed, distance, heart_rate,
 # lat, lon) are kept when present.
-# FIT stores cadence in cycles/min (one cycle = left + right stroke, as for
-# running), so FIT cadence is multiplied by fit_strokes_per_cycle (2):
-# WorkOutDoors shows ~85 strokes/min where its FIT file says ~42.
-read_reference <- function(path, fit_strokes_per_cycle = 2) {
+# Unverified: whether FIT cadence counts every stroke. WorkOutDoors showed
+# ~85/min on screen while the file says ~42. Use fit_strokes_per_cycle = 2
+# once the Tag comparison (median ratio est/ref) shows a ratio near 2.
+read_reference <- function(path, fit_strokes_per_cycle = 1) {
   ext <- tolower(tools::file_ext(path))
   scale <- 1
   if (ext == "fit") {

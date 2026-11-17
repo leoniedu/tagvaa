@@ -280,13 +280,14 @@ or `RunCadence`), or **CSV** with columns `time` (ISO 8601, UTC) and
 
 Our reference is an **Apple Watch with WorkOutDoors** (FIT export, sport
 "paddling", 1 record/s with cadence, speed, distance, heart rate, GPS).
-FIT stores cadence in **cycles/min** (one cycle = left + right stroke, the
-FIT convention also used for running): the app showed ~85 strokes/min where
-the file says ~42, so `read_reference()` doubles FIT cadence
-(`fit_strokes_per_cycle = 2`). In a 70-min session without the Tag
-(`0926.fit`, 2026-11-17) the file's cadence was smooth and step-like, 30–60
-cycles/min (median 42 → ~84 strokes/min), never 0; when the workout pauses,
-records stop rather than dropping to 0.
+**Open question: does the FIT cadence count every stroke?** The app
+showed ~85/min while the file says ~42 (median over a 70-min session
+without the Tag, `0926.fit`, 2026-11-17; smooth and step-like, never 0;
+records stop when the workout pauses). Distance per stroke doesn't settle
+it: at 5.9 km/h → 2.4 m (42) or 1.2 m (85); at 8.7 km/h → 3.4 m or 1.7 m.
+`read_reference()` uses the file value as-is (`fit_strokes_per_cycle = 1`);
+the Tag comparison's median ratio est/ref (≈1 or ≈2) will decide. A manual
+count of strokes over 30 s while paddling also settles it.
 
 Note for M5: Paddle Stroke must also report **strokes**/min, so each detected
 stroke adds one crank revolution (85 strokes/min shows as 85 rpm). If the
