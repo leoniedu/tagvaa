@@ -159,7 +159,7 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 | 2 | `m2_accel` | I2C scan, LIS2DH WHO_AM_I, x/y/z at 10 Hz | ✅ verified 2026-11-17 (0x19, 0x33, \|a\| ≈ 0.99 g at rest) |
 | 3 | `m3_csc` | BLE CSC sensor, fixed 60 rpm (go/no-go) | ✅ **GO** 2026-11-17: CS300 shows 60 rpm |
 | 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO) + battery lines + R script | ✅ 2026-11-17: Mac and iPhone (Bluefruit Connect), 0 lost, ~100.6 Hz; boat session pending |
-| 5 | — | On-device stroke detector | after real data |
+| 5 | `m5_stroke` | On-device stroke detector → CSC cadence, GNSS off | built; detector replay-tested on the Mac; not yet on hardware |
 | 6 | — | Power management | later |
 | — | `docs/junction_box.md` | Sidequest: solar + battery junction box | paper design |
 | T | `t_rail` | Test: what is on the switched 3.3 V rail | ✅ run 2026-11-17: GNSS on the rail, accelerometer not |
@@ -167,6 +167,36 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 Serial monitor (any milestone): `.venv/bin/pio device monitor`
 (115200 baud, Ctrl-C quits). Back to the bootloader: type `dfu` + Enter in the
 monitor, or hold the front button 5 s.
+
+### 5 — Stroke detector + cadence (`m5_stroke.uf2`)
+
+- `lib/stroke/stroke_detector.{h,cpp}`: causal port of `analysis/stroke_rate.R`
+  (gravity EMA → horizontal part → surge axis tracked by EMA covariance +
+  power iteration → 0.5–2 Hz band-pass → adaptive-threshold peaks with a
+  minimum gap of ≥ 0.6 s and ≥ 60 % of the recent median interval, capped
+  at 1 s). Plain C++, no Arduino.
+- Replay on the Mac (`test/host/stroke_replay.cpp`) of the 45-min OC1
+  session: **1820 strokes vs 1828 in R**, 94 % within 0.3 s of an R stroke,
+  per-minute counts differ by 0.4 on average. Without the 1 s cap, a few
+  early misses inflated the gap and locked it at every other stroke (375
+  strokes); the surge axis also settles faster now (running mean until the
+  20 s EMA takes over).
+
+  ```sh
+  c++ -std=c++17 -O2 -I lib/stroke lib/stroke/stroke_detector.cpp test/host/stroke_replay.cpp -o .pio/stroke_replay
+  .pio/stroke_replay < data/<session>_window.csv     # lines seq,t_ms,x_mg,y_mg,z_mg
+  ```
+- Firmware: each confirmed stroke = one crank revolution (event time = the
+  stroke's peak, 1/1024 s); CSC Measurement notified every second, so the
+  head unit shows strokes/min and drops to 0 when paddling stops. A stroke
+  is confirmed ~0.6–0.9 s after its peak.
+- Advertises as **Paddle Stroke** (CSC service + appearance; Nordic UART in
+  the scan response); two connections (head unit + phone). The UART carries
+  the raw 100 Hz stream as in M4 plus `# stroke n=… seq=… t_ms=…` and
+  `# battery` lines, so a phone can record for validation while the CS300
+  shows cadence.
+- GNSS rail off, blue LED off, green blinks 30 ms per stroke; battery
+  service reports a real percentage (Meshtastic's OCV table).
 
 ### T — 3.3 V rail test (`t_rail.uf2`)
 
