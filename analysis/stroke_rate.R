@@ -27,7 +27,8 @@ params <- list(
   band_hz = c(0.5, 2),    # band-pass around the stroke frequency (30-120 spm)
   bp_stages = 2,          # cascaded biquads (2 = 4th order)
   min_gap_s = 0.6,        # no two strokes closer than this (100 spm) ...
-  min_gap_frac = 0.6,     # ... nor than this fraction of the recent typical interval
+  min_gap_frac = 0.6,     # ... nor than this fraction of the recent typical interval,
+  max_gap_s = 1.0,        # ... capped here (else missed strokes inflate the gap and lock in)
   gap_history_n = 8,      # strokes in the "recent typical interval" (median)
   level_tau_s = 3,        # time constant of the running signal level
   threshold_k = 0.5,      # peak must exceed k * running mean |signal|
@@ -105,7 +106,7 @@ detect_strokes <- function(acc, p = params) {
     min_gap <- p$min_gap_s * sample_rate_hz
     if (last > p$gap_history_n) {
       recent <- diff(kept[(last - p$gap_history_n):last])
-      min_gap <- max(min_gap, p$min_gap_frac * median(recent))
+      min_gap <- max(min_gap, min(p$min_gap_frac * median(recent), p$max_gap_s * sample_rate_hz))
     }
     if (last == 0 || j - kept[[last]] >= min_gap) {
       kept <- c(kept, j)
