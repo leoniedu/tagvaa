@@ -26,7 +26,9 @@ params <- list(
   gravity_tau_s = 2,      # low-pass time constant for gravity
   band_hz = c(0.5, 2),    # band-pass around the stroke frequency (30-120 spm)
   bp_stages = 2,          # cascaded biquads (2 = 4th order)
-  min_gap_s = 0.6,        # no two strokes closer than this (100 spm)
+  min_gap_s = 0.6,        # no two strokes closer than this (100 spm) ...
+  min_gap_frac = 0.6,     # ... nor than this fraction of the recent typical interval
+  gap_history_n = 8,      # strokes in the "recent typical interval" (median)
   level_tau_s = 3,        # time constant of the running signal level
   threshold_k = 0.5,      # peak must exceed k * running mean |signal|
   min_amp_g = 0.02,       # ... and this absolute amplitude
@@ -95,10 +97,16 @@ detect_strokes <- function(acc, p = params) {
   i <- 2:(n - 1)
   cand <- i[x[i] > x[i - 1] & x[i] >= x[i + 1] & x[i] > thresh[i]]
 
-  min_gap <- p$min_gap_s * sample_rate_hz
+  # Minimum gap adapts to the recent stroke interval, so split peaks (e.g.
+  # at side switches) are not counted twice at slow rates.
   kept <- integer(0)
   for (j in cand) {
     last <- length(kept)
+    min_gap <- p$min_gap_s * sample_rate_hz
+    if (last > p$gap_history_n) {
+      recent <- diff(kept[(last - p$gap_history_n):last])
+      min_gap <- max(min_gap, p$min_gap_frac * median(recent))
+    }
     if (last == 0 || j - kept[[last]] >= min_gap) {
       kept <- c(kept, j)
     } else if (x[j] > x[kept[[last]]]) {
@@ -233,7 +241,15 @@ if (sys.nframe() == 0) {
   args <- commandArgs(trailingOnly = TRUE)
   if (length(args) < 1) stop("Usage: Rscript analysis/stroke_rate.R session.csv [reference.tcx|.fit|.csv] [YYYY-MM-DD]")
   date <- if (length(args) >= 3) args[[3]] else NULL
-  acc <- read_accel(args[[1]], date = date) |> stroke_signal()
+  acc <- read_accel(args[[1]], date = date)
+  ref <- if (length(args) >= 2) read_reference(args[[2]]) else NULL
+  if (!is.null(ref) && "time" %in% names(acc)) {
+    # Only the part of the recording covered by the reference: before and
+    # after, the Tag is usually being handled, which spoils the surge axis.
+    acc <- acc |> filter(between(time, min(ref$time), max(ref$time)))
+    message(sprintf("analysing %.1f min within the reference's time span", nrow(acc) / sample_rate_hz / 60))
+  }
+  acc <- stroke_signal(acc)
   check_gaps(acc)
   strokes <- detect_strokes(acc)
   est <- rate_per_second(strokes, acc)
@@ -246,7 +262,7 @@ if (sys.nframe() == 0) {
   }
   write_csv(est, str_c(stem, "_spm.csv"))
   if (length(args) >= 2) {
-    cmp <- compare_rates(est, read_reference(args[[2]]))
+    cmp <- compare_rates(est, ref)
     suppressWarnings(ggsave(str_c(stem, "_compare.png"), plot_compare(cmp), width = 12, height = 5, dpi = 120, bg = "white"))
   }
   message("Written: ", stem, "_strokes.png, _zoom.png, _spm.csv", if (length(args) >= 2) ", _compare.png")

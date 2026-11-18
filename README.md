@@ -329,6 +329,28 @@ two strokes.
 Synthetic check (10 min, varying 55–80 spm, rotated Tag, reference clock
 4 s off): 576 strokes detected vs ~575 true; after alignment MAE 0.3 spm.
 
+**First water session (OC1, 2026-11-18, 18:41–19:26, files
+`data/oc1_20261118_*`, not committed).** Tag recorded via Bluefruit
+Connect for 1 h 43 min (619 932 samples, 3 lost); Apple Watch WorkOutDoors
+in *running* mode by mistake (its FIT `cadence` is then strides/min, i.e.
+one per stroke). Analysis restricted to the watch's time span, where the Tag
+lay flat (z up); surge axis = Tag x.
+- Hull surge shows one smooth cycle per stroke, ~1.45 s, well above the
+  wave noise; side switches show as short spikes and could split a peak, so
+  the minimum gap is now adaptive (≥ 60 % of the median of the last 8
+  intervals).
+- 1828 strokes in 45 min, median **41.1 strokes/min**; watch 1906 "strides",
+  average 42.
+- Per minute: Tag 40.7 ± 2.1, watch 42.2 ± 3.7; MAE 2.4 overall and
+  **1.2 spm from 18:57 on**. Before that the watch has bursts to 50–65
+  (e.g. 18:56) while the hull shows a steady ~40/min: the watch is wrong
+  there.
+- Per-second alignment is not meaningful at this steady rate (r ≈ 0); use
+  per-minute comparisons.
+- So in this session the FIT's ~42 counted every stroke, and the real rate
+  was ~41/min (relaxed paddling); the app's on-screen ~85 doubles it.
+- Battery 3957 → 3895 mV over 1 h 43 min on battery (logger, GNSS on).
+
 First water test (OC1): Tag rigidly fixed to the hull, phone (Bluefruit
 Connect, recording) and watch (paddling activity with stroke rate) both
 running; ~30 s still at start and end; 10+ min including steady pieces at

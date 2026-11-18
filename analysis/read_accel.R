@@ -19,22 +19,29 @@ data_pattern <- "-?\\d+,-?\\d+,-?\\d+,-?\\d+,-?\\d+$"
 # Bluefruit Connect UART export (also written by scripts/ble_log.py):
 # "Timestamp,Mode,Data", one BLE packet per quoted Data field, with the
 # packet's trailing newline stripped. A line can be cut across packets, so
-# the stream is rebuilt packet by packet: a newline goes between two packets
-# only if the line rebuilt so far is complete and the next packet does not
-# start with the tail of a line.
+# the stream is rebuilt packet by packet. A packet with a newline starts with
+# the tail of a line if its first line is incomplete. A packet without one is
+# a whole line or the end of a line when the following packet starts a fresh
+# line (its own newline was stripped), and otherwise the start of a line.
+# A newline goes before a packet only if the line rebuilt so far is complete
+# and the packet does not continue it. Lost packets can still glue fragments
+# together; read_accel() drops such lines by plausibility.
 # Returns the lines plus a clock table pairing each packet's arrival time on
 # the phone (seconds since local midnight) with the t_ms of the last complete
 # sample received so far.
 unpack_bluefruit <- function(path) {
   packets <- read_csv(path, col_types = "ccc", trim_ws = FALSE) |>
-    filter(Mode == "RX")
+    filter(Mode == "RX", !is.na(Data), Data != "") # a packet of just "\n" arrives empty
   data <- packets$Data
   is_complete <- \(x) str_detect(x, str_c("^", data_pattern)) | str_starts(x, "#") | x == "seq,t_ms,x_mg,y_mg,z_mg"
   has_newline <- str_detect(data, "\n")
   last_line <- str_extract(data, "[^\n]*$")
-  starts_with_tail <- has_newline & !is_complete(str_extract(data, "^[^\n]*"))
-
+  first_complete <- is_complete(str_extract(data, "^[^\n]*"))
   n <- length(data)
+  next_starts_fresh <- c(first_complete[-1], TRUE)
+  continues <- if_else(has_newline, !first_complete, !is_complete(data) & next_starts_fresh)
+  starts_with_tail <- continues
+
   sep <- character(n)       # separator placed before packet k
   current <- character(n)   # last (possibly partial) line after packet k
   for (k in seq_len(n)) {
@@ -68,8 +75,6 @@ add_wall_clock <- function(acc, clock, date, tz) {
   acc |> mutate(time = midnight + predict(fit, newdata = acc))
 }
 
-# date: day of the recording (the export only has times of day); defaults to
-# the file's modification date. tz: the phone's time zone.
 # All text lines of a recording (Bluefruit/ble_log export or plain), plus the
 # phone clock table when the export has timestamps.
 read_stream_lines <- function(path) {
@@ -93,6 +98,8 @@ read_battery <- function(path) {
     arrange(t_ms)
 }
 
+# date: day of the recording (the export only has times of day); defaults to
+# the file's modification date. tz: the phone's time zone.
 read_accel <- function(path, date = NULL, tz = Sys.timezone()) {
   stream <- read_stream_lines(path)
   lines <- stream$lines
@@ -109,6 +116,22 @@ read_accel <- function(path, date = NULL, tz = Sys.timezone()) {
   } else {
     acc <- read_csv(I(rows), col_names = c("seq", "t_ms", "x_mg", "y_mg", "z_mg"), col_types = "ddddd")
   }
+
+  # Drop lines garbled by lost BLE packets: values beyond +-4.1 g (the range
+  # is +-4 g) or a seq that does not fit the seq -> t_ms line.
+  n_raw <- nrow(acc)
+  acc <- acc |> filter(abs(x_mg) <= 4100, abs(y_mg) <= 4100, abs(z_mg) <= 4100)
+  if (nrow(acc) > 10) {
+    # robust slope (ms per sample) from random far-apart pairs
+    i <- sample.int(nrow(acc), 5000, replace = TRUE)
+    j <- sample.int(nrow(acc), 5000, replace = TRUE)
+    far <- abs(acc$seq[i] - acc$seq[j]) > 1000
+    slope <- median((acc$t_ms[i] - acc$t_ms[j])[far] / (acc$seq[i] - acc$seq[j])[far], na.rm = TRUE)
+    if (!is.finite(slope)) slope <- 10
+    resid <- acc$t_ms - slope * acc$seq
+    acc <- acc[abs(resid - median(resid)) < 2000, ]
+  }
+  if (nrow(acc) < n_raw) message(sprintf("dropped %d implausible line(s)", n_raw - nrow(acc)))
 
   acc <- acc |>
     distinct(seq, .keep_all = TRUE) |>
@@ -134,7 +157,7 @@ check_gaps <- function(acc) {
   span_s <- (max(acc$t_ms) - min(acc$t_ms)) / 1000
   n_expected <- max(acc$seq) - min(acc$seq) + 1
   cli_msg <- sprintf(
-    "%d samples, %.1f s; %d lost (%.2f%%) in %d gaps; measured rate from t_ms: %.2f Hz",
+    "%.0f samples, %.1f s; %.0f lost (%.2f%%) in %.0f gaps; measured rate from t_ms: %.2f Hz",
     nrow(acc), nrow(acc) / sample_rate_hz, n_expected - nrow(acc),
     100 * (n_expected - nrow(acc)) / n_expected, nrow(gaps),
     (n_expected - 1) / span_s
