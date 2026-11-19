@@ -160,7 +160,7 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 | 3 | `m3_csc` | BLE CSC sensor, fixed 60 rpm (go/no-go) | ✅ **GO** 2026-11-17: CS300 shows 60 rpm |
 | 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO) + battery lines + R script | ✅ 2026-11-17: Mac and iPhone (Bluefruit Connect), 0 lost, ~100.6 Hz; boat session pending |
 | 5 | `m5_stroke` | On-device stroke detector → CSC cadence, GNSS off | replay-tested; bench ✅; **CS300 shows cadence** ✅ 2026-11-19; smoothing added; water pending |
-| 5b | `m5_acf` | Same, but the rate comes from a running-autocorrelation tracker; blanks outside 30–110/min | built; Mac replay matches the lab; not yet on hardware |
+| 5b | `m5_acf` | Same, but the rate comes from a running-autocorrelation tracker; blanks outside 30–110/min | flashed 2026-11-19; bench: firmware == Mac replay; real session pending |
 | 6 | — | Power management | later |
 | — | `docs/junction_box.md` | Sidequest: solar + battery junction box | paper design |
 | T | `t_rail` | Test: what is on the switched 3.3 V rail | ✅ run 2026-11-17: GNSS on the rail, accelerometer not |
@@ -249,6 +249,12 @@ meaningful as a cadence.
   then `.pio/acf_replay < data/session_window.csv`. Against the double-precision lab it
   agrees to 0.7 strokes/min on the real session (two seconds at a rate jump differ by
   more) and within one event in the count.
+- Bench on the Tag (hand sliding, 3 min): device and Mac replay of the recorded raw
+  stream agree (validity identical in 185 readouts, median difference 0.1 strokes/min).
+  Moving at ~157/min (spectrum of the raw surge) was blanked after ~6 s of showing a wrong
+  60. Hand sliding has strong harmonics, so its true cycle rate is ambiguous (at 145-160 s
+  both tracker and peak logic said 48/min, the spectrum's strongest line was ~100/min):
+  accuracy needs real paddling with counted strokes.
 - UART log lines for checking a session: `# rate t_ms=… acf=… valid=… revs=…` once a
   second (what the tracker believes), `# acf n=… t_ms=…` per stroke sent to the head
   unit, `# stroke …` for the old peak logic (logged only), `# battery …`.
