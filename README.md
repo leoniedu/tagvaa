@@ -160,6 +160,7 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 | 3 | `m3_csc` | BLE CSC sensor, fixed 60 rpm (go/no-go) | ✅ **GO** 2026-11-17: CS300 shows 60 rpm |
 | 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO) + battery lines + R script | ✅ 2026-11-17: Mac and iPhone (Bluefruit Connect), 0 lost, ~100.6 Hz; boat session pending |
 | 5 | `m5_stroke` | On-device stroke detector → CSC cadence, GNSS off | replay-tested; bench ✅; **CS300 shows cadence** ✅ 2026-11-19; smoothing added; water pending |
+| 5b | `m5_acf` | Same, but the rate comes from a running-autocorrelation tracker; blanks outside 30–110/min | built; Mac replay matches the lab; not yet on hardware |
 | 6 | — | Power management | later |
 | — | `docs/junction_box.md` | Sidequest: solar + battery junction box | paper design |
 | T | `t_rail` | Test: what is on the switched 3.3 V rail | ✅ run 2026-11-17: GNSS on the rail, accelerometer not |
@@ -223,6 +224,34 @@ monitor, or hold the front button 5 s.
   after a pause (> 2.5 s). Replayed on the water session: 41.2 ± 3.6/min
   (29–58). A 40 → 55/min change shows within 4 strokes. (8 intervals gave
   ± 2.8 but took 7 strokes and felt too slow on the CS300.)
+
+### 5b — Autocorrelation tracker (`m5_acf.uf2`)
+
+Replaces the peak accept/reject logic of M5 (which `m5_stroke` keeps as the fallback)
+with a continuous period estimate, after the Mac lab in `experiments/` showed it is far
+steadier. `lib/stroke/acf_tracker.{h,cpp}` (plain float C++, ~2k multiply-adds/s) takes
+the band-passed surge from `StrokeDetector`, keeps a recursive autocorrelation, picks the
+period every 0.2 s (octave check, parabola, median + EMA) and blanks rhythms outside
+30–110 strokes/min. Strokes sent to the head unit are the integer crossings of the
+integrated phase of that rate, so they are evenly spaced; the stroke *count* is only
+meaningful as a cadence.
+
+- Real OC1 session (45 min, Mac lab): jitter 1.3 vs 3.5 strokes/min for the peak
+  logic, 0.7 % vs 9.2 % of seconds off by more than 15 %. Settings tuned on separate
+  train / validation / fresh synthetic sets and two halves of the real session
+  (`experiments/tune.R`); out-of-range blanking 92–100 % for 115–150/min and 25–28/min,
+  96–100 % correct for 32–108/min (`experiments/range_eval.R`, synthetic).
+- Known limits: starts ~10 s after paddling begins, keeps a stale rhythm 4–5 s after a
+  stop, slow to follow a doubling of the rate (7 s); cannot tell wave rhythm inside the
+  range from paddling; rates around 15–20/min are not reliably caught.
+- Replay on the Mac (same classes as the firmware, float):
+  `c++ -std=c++17 -O2 -I lib/stroke lib/stroke/stroke_detector.cpp lib/stroke/acf_tracker.cpp test/host/acf_replay.cpp -o .pio/acf_replay`
+  then `.pio/acf_replay < data/session_window.csv`. Against the double-precision lab it
+  agrees to 0.7 strokes/min on the real session (two seconds at a rate jump differ by
+  more) and within one event in the count.
+- UART log lines for checking a session: `# rate t_ms=… acf=… valid=… revs=…` once a
+  second (what the tracker believes), `# acf n=… t_ms=…` per stroke sent to the head
+  unit, `# stroke …` for the old peak logic (logged only), `# battery …`.
 
 ### T — 3.3 V rail test (`t_rail.uf2`)
 
