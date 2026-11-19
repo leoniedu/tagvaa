@@ -159,7 +159,7 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 | 2 | `m2_accel` | I2C scan, LIS2DH WHO_AM_I, x/y/z at 10 Hz | ✅ verified 2026-11-17 (0x19, 0x33, \|a\| ≈ 0.99 g at rest) |
 | 3 | `m3_csc` | BLE CSC sensor, fixed 60 rpm (go/no-go) | ✅ **GO** 2026-11-17: CS300 shows 60 rpm |
 | 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO) + battery lines + R script | ✅ 2026-11-17: Mac and iPhone (Bluefruit Connect), 0 lost, ~100.6 Hz; boat session pending |
-| 5 | `m5_stroke` | On-device stroke detector → CSC cadence, GNSS off | replay-tested; bench ✅ 2026-11-18 (still: 0; sliding ~1/s: ~63/min; slower: ~48/min); CS300 + water pending |
+| 5 | `m5_stroke` | On-device stroke detector → CSC cadence, GNSS off | replay-tested; bench ✅; **CS300 shows cadence** ✅ 2026-11-19; smoothing added; water pending |
 | 6 | — | Power management | later |
 | — | `docs/junction_box.md` | Sidequest: solar + battery junction box | paper design |
 | T | `t_rail` | Test: what is on the switched 3.3 V rail | ✅ run 2026-11-17: GNSS on the rail, accelerometer not |
@@ -195,8 +195,24 @@ monitor, or hold the front button 5 s.
   the raw 100 Hz stream as in M4 plus `# stroke n=… seq=… t_ms=…` and
   `# battery` lines, so a phone can record for validation while the CS300
   shows cadence.
-- GNSS rail off, blue LED off, green blinks 30 ms per stroke; battery
-  service reports a real percentage (Meshtastic's OCV table).
+- GNSS rail off, blue LED off, green blinks 30 ms per stroke and every
+  5 s (heartbeat); battery service reports a real percentage (Meshtastic's
+  OCV table).
+- **CS300 link fix (2026-11-19):** the first M5 build requested 2M PHY,
+  data length and MTU 247 on every connection (as M4 does for phones); the
+  CS300 then dropped the link after exactly 30 s (an unanswered GATT
+  procedure times out), over and over. Without those requests (as in M3)
+  it stays connected (`CS300-1585896` in the log). Phones still negotiate a
+  large MTU themselves. Some connection attempts still fail at first
+  (reason 0x3E) before one sticks.
+- **Smoothing (2026-11-19):** the head unit shows 60 / (time between the
+  last two strokes), so it jumped with every stroke (water session:
+  41.9 ± 6.5/min, 24–90). The stroke count stays exact; the reported stroke
+  times are spaced at the mean of the last 8 intervals without the
+  shortest and longest, pulled 5 % per stroke toward real time, restarting
+  after a pause (> 2.5 s). Replayed on the water session: 41.1 ± 2.8/min
+  (31–54), reported times within 1.1 s of real ones. Reacts to a rate
+  change in about 4–5 strokes.
 
 ### T — 3.3 V rail test (`t_rail.uf2`)
 

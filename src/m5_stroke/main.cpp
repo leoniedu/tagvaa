@@ -26,6 +26,7 @@ constexpr uint32_t POLL_MS = 50;
 constexpr uint32_t CSC_EVERY_MS = 1000;
 constexpr uint32_t BATTERY_EVERY_MS = 60000;
 constexpr uint32_t LED_BLINK_MS = 30;
+constexpr uint32_t HEARTBEAT_MS = 5000; // short blink so you can see it's on
 
 LIS2DH accel;
 StrokeDetector detector;
@@ -40,6 +41,58 @@ BLEBas battery;
 
 uint16_t crankRevs = 0;          // cumulative strokes (wraps at 65536)
 uint16_t lastCrankEventTime = 0; // time of the last stroke, 1/1024 s (wraps)
+
+// Smoothing. The head unit shows 60 / (time between the last two strokes),
+// so it jumps with every stroke. The stroke count stays exact; only the
+// reported stroke times are spaced at a smoothed interval: the mean of the
+// last SMOOTH_N intervals without their shortest and longest, nudged 5 % per
+// stroke toward the real stroke time so it can't drift away (a hard resync
+// shows as one bogus value). After a pause it restarts from real time.
+// Replayed on the OC1 session: per-stroke 41.9 +- 6.5/min -> 41.1 +- 2.8.
+constexpr int SMOOTH_N = 8;
+constexpr uint32_t PAUSE_MS = 2500;     // longer interval = pause, not a stroke rate
+constexpr float PULL = 0.05f;           // fraction of the drift corrected per stroke
+constexpr uint32_t MAX_DRIFT_MS = 5000; // safety: resync if it still drifts this far
+uint32_t intervals[SMOOTH_N];
+int intervalCount = 0;
+uint32_t lastStrokeMs = 0;
+uint32_t reportedMs = 0;
+
+uint32_t smoothedInterval()
+{
+    int n = intervalCount < SMOOTH_N ? intervalCount : SMOOTH_N;
+    uint32_t sum = 0, lo = UINT32_MAX, hi = 0;
+    for (int i = 0; i < n; i++) {
+        sum += intervals[i];
+        if (intervals[i] < lo) lo = intervals[i];
+        if (intervals[i] > hi) hi = intervals[i];
+    }
+    if (n >= 4) return (sum - lo - hi) / (n - 2);
+    return sum / n;
+}
+
+// Returns the stroke time to report (ms).
+uint32_t smoothStroke(uint32_t strokeMs)
+{
+    uint32_t interval = strokeMs - lastStrokeMs;
+    bool first = (crankRevs == 0) || interval >= PAUSE_MS;
+    lastStrokeMs = strokeMs;
+    if (first) {
+        intervalCount = 0;
+        reportedMs = strokeMs;
+        return reportedMs;
+    }
+    intervals[intervalCount % SMOOTH_N] = interval;
+    intervalCount++;
+    uint32_t predicted = reportedMs + smoothedInterval();
+    int32_t error = (int32_t)(strokeMs - predicted);
+    reportedMs = predicted + (int32_t)(PULL * error);
+    int32_t drift = (int32_t)(reportedMs - strokeMs);
+    if (drift > (int32_t)MAX_DRIFT_MS || drift < -(int32_t)MAX_DRIFT_MS) {
+        reportedMs = strokeMs;
+    }
+    return reportedMs;
+}
 bool streaming[MAX_CONNECTIONS] = {false};
 uint32_t ledOffAt = 0;
 
@@ -66,13 +119,12 @@ uint8_t connectionCount()
 
 void onConnect(uint16_t conn_hdl)
 {
+    // No PHY / data-length / MTU requests here: bike computers may drop the
+    // link over them; phones negotiate a large MTU themselves.
     BLEConnection *conn = Bluefruit.Connection(conn_hdl);
-    conn->requestPHY();
-    conn->requestDataLengthUpdate();
-    conn->requestMtuExchange(247);
     char peer[32] = {0};
     conn->getPeerName(peer, sizeof peer);
-    Serial.printf("# BLE connected [%u] %s\n", conn_hdl, peer);
+    Serial.printf("# BLE connected [%u] %s, interval %u x 1.25 ms\n", conn_hdl, peer, conn->getConnectionInterval());
     if (connectionCount() < MAX_CONNECTIONS) {
         Bluefruit.Advertising.start(0);
     }
@@ -218,8 +270,9 @@ void loop()
         if (detector.update(s.x_mg / 1000.0f, s.y_mg / 1000.0f, s.z_mg / 1000.0f)) {
             uint32_t strokeSeq = detector.strokeSample();
             uint32_t strokeMs = now - (uint32_t)(detector.samples() - 1 - strokeSeq) * SAMPLE_PERIOD_MS;
+            uint32_t reported = smoothStroke(strokeMs);
             crankRevs++;
-            lastCrankEventTime = (uint16_t)(((uint64_t)strokeMs * 1024) / 1000);
+            lastCrankEventTime = (uint16_t)(((uint64_t)reported * 1024) / 1000);
             len += snprintf(buf + len, sizeof buf - len, "# stroke n=%lu seq=%lu t_ms=%lu\n",
                             (unsigned long)detector.strokes(), (unsigned long)strokeSeq, (unsigned long)strokeMs);
             digitalWrite(LED_GREEN, LED_STATE_ON);
@@ -242,6 +295,13 @@ void loop()
         char msg[48];
         snprintf(msg, sizeof msg, "# battery t_ms=%lu mv=%u\n", (unsigned long)now, mv);
         output(msg);
+    }
+
+    static uint32_t lastHeartbeat = 0;
+    if (now - lastHeartbeat >= HEARTBEAT_MS) {
+        lastHeartbeat = now;
+        digitalWrite(LED_GREEN, LED_STATE_ON);
+        ledOffAt = now + LED_BLINK_MS;
     }
 
     if (ledOffAt && (int32_t)(now - ledOffAt) >= 0) {
