@@ -174,10 +174,20 @@ monitor, or hold the front button 5 s.
   (gravity EMA → horizontal part → surge axis tracked by EMA covariance +
   power iteration → 0.5–2 Hz band-pass → adaptive-threshold peaks with a
   minimum gap of ≥ 0.6 s and ≥ 60 % of the recent median interval, capped
-  at 1 s). Plain C++, no Arduino.
+  at 1 s; a peak past 0.6 s that is at least 80 % of the recent typical
+  peak still counts, so sudden speed-ups don't lock at half rate). Plain
+  C++, no Arduino.
 - Replay on the Mac (`test/host/stroke_replay.cpp`) of the 45-min OC1
-  session: **1820 strokes vs 1828 in R**, 94 % within 0.3 s of an R stroke,
-  per-minute counts differ by 0.4 on average. Without the 1 s cap, a few
+  session: **1833 strokes vs 1828 in R**, 94 % within 0.3 s of an R stroke.
+- **Half-rate lock (2026-11-19):** on the CS300 the rate could not get past
+  ~50/min when speeding up. After a slower stretch the adaptive minimum gap
+  (60 % of the recent interval) rejected every other faster stroke, so the
+  detector saw half the real rate and the gap never shrank. Fix: a peak
+  past the fixed 0.6 s gap counts if it is ≥ 80 % of the recent median peak
+  (split peaks at side switches are weaker). Simulated steps 40, 80, 45, 65,
+  90, 40/min: detected 41, 81, 45, 64, 90, 40 (before: 37, 32, 45, 64, 90,
+  38). Threshold 0.8 chosen from 0.6–0.9: fewest extra strokes on the water
+  session while all steps stay correct. Without the 1 s cap, a few
   early misses inflated the gap and locked it at every other stroke (375
   strokes); the surge axis also settles faster now (running mean until the
   20 s EMA takes over).

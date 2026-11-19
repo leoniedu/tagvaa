@@ -27,6 +27,9 @@ struct StrokeParams {
     float minGapS = 0.6f;       // strokes at least this far apart ...
     float minGapFrac = 0.6f;    // ... and this fraction of the recent median interval,
     float maxGapS = 1.0f;       // ... capped here (else missed strokes inflate the gap and lock in)
+    float strongFrac = 0.8f;    // a peak inside the adaptive gap (but past minGapS) still counts
+                                // if it is at least this fraction of the recent stroke peaks
+                                // (sudden speed-ups); weaker split peaks are merged
     float warmupS = 5.0f;       // no strokes before the filters settle
 };
 
@@ -81,5 +84,7 @@ class StrokeDetector
     uint32_t confirmedIdx_ = 0;
     uint32_t count_ = 0;
     uint32_t history_[HISTORY] = {0};
+    float peaks_[HISTORY] = {0};
     int historyLen_ = 0;
+    float typicalPeak() const;
 };

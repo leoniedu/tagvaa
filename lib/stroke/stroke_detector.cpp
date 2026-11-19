@@ -6,11 +6,11 @@ namespace
 {
 float emaAlpha(float tauS, float fs) { return 1.0f - expf(-1.0f / (tauS * fs)); }
 
-uint32_t median(uint32_t *v, int n)
+template <typename T> T median(T *v, int n)
 {
     // insertion sort; n <= 8
     for (int i = 1; i < n; i++) {
-        uint32_t key = v[i];
+        T key = v[i];
         int j = i - 1;
         while (j >= 0 && v[j] > key) {
             v[j + 1] = v[j];
@@ -72,18 +72,29 @@ uint32_t StrokeDetector::minGapSamples() const
     return gap;
 }
 
+float StrokeDetector::typicalPeak() const
+{
+    if (historyLen_ < 3) return 0.0f;
+    float p[HISTORY];
+    for (int i = 0; i < historyLen_; i++) p[i] = peaks_[i];
+    return median(p, historyLen_);
+}
+
 void StrokeDetector::confirm()
 {
     confirmedIdx_ = pendingIdx_;
     count_++;
     hasPending_ = false;
     if (historyLen_ < HISTORY) {
+        peaks_[historyLen_] = pendingVal_;
         history_[historyLen_++] = confirmedIdx_;
     } else {
         for (int i = 0; i < HISTORY - 1; i++) {
             history_[i] = history_[i + 1];
+            peaks_[i] = peaks_[i + 1];
         }
         history_[HISTORY - 1] = confirmedIdx_;
+        peaks_[HISTORY - 1] = pendingVal_;
     }
 }
 
@@ -152,11 +163,19 @@ bool StrokeDetector::update(float ax, float ay, float az)
         confirmed = true;
     }
     if (xPrev1_ > xPrev2_ && xPrev1_ >= x_ && xPrev1_ > thr_) {
-        bool tooClose = false;
-        if (hasPending_) {
-            tooClose = true; // still within the gap of the pending peak
-        } else if (count_ > 0 && idx - confirmedIdx_ < gap) {
-            tooClose = true;
+        uint32_t lastIdx = hasPending_ ? pendingIdx_ : confirmedIdx_;
+        bool any = hasPending_ || count_ > 0;
+        bool tooClose = any && idx - lastIdx < gap;
+        // Strong peak past the fixed minimum gap: a real stroke at a higher
+        // rate, not a split peak; otherwise a sudden speed-up locks at half rate.
+        uint32_t fixedGap = (uint32_t)(p_.minGapS * p_.fs);
+        float typical = typicalPeak();
+        if (tooClose && idx - lastIdx >= fixedGap && typical > 0.0f && xPrev1_ >= p_.strongFrac * typical) {
+            tooClose = false;
+            if (hasPending_) {
+                confirm();
+                confirmed = true;
+            }
         }
         if (!tooClose) {
             hasPending_ = true;
