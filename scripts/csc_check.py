@@ -1,6 +1,11 @@
-"""Scan for "Paddle Stroke", read CSC Feature, print 5 CSC Measurement notifications with computed rpm."""
+"""Scan for "Paddle Stroke", read CSC Feature, print CSC Measurement notifications with computed rpm.
+
+Usage: .venv/bin/python scripts/csc_check.py [notifications=5]
+"""
 import asyncio
 import struct
+import sys
+import time
 
 from bleak import BleakClient, BleakScanner
 
@@ -32,18 +37,20 @@ async def main():
             drevs = (revs - prev[0]) & 0xFFFF
             dt = ((t - prev[1]) & 0xFFFF) / 1024
             rpm = f"{60 * drevs / dt:.1f} rpm" if dt else ""
-        print(f"  {data.hex(' ')}  flags=0x{flags:02x} revs={revs} t={t}  {rpm}")
-        prev = (revs, t)
+        print(f"  {time.strftime('%H:%M:%S')}  {data.hex(' ')}  revs={revs} t={t}  {rpm}", flush=True)
+        if not prev or revs != prev[0]:
+            prev = (revs, t)
         count += 1
-        if count >= 5:
+        if count >= limit:
             done.set()
 
     async with BleakClient(dev) as client:
         feature = await client.read_gatt_char(CSC_FEATURE)
         print(f"CSC Feature: 0x{int.from_bytes(feature, 'little'):04x}")
         await client.start_notify(CSC_MEASUREMENT, on_measure)
-        await asyncio.wait_for(done.wait(), timeout=15)
+        await asyncio.wait_for(done.wait(), timeout=limit + 10)
         await client.stop_notify(CSC_MEASUREMENT)
 
 
+limit = int(sys.argv[1]) if len(sys.argv) > 1 else 5
 asyncio.run(main())
