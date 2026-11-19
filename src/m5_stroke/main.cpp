@@ -48,8 +48,9 @@ uint16_t lastCrankEventTime = 0; // time of the last stroke, 1/1024 s (wraps)
 // last SMOOTH_N intervals without their shortest and longest, nudged 5 % per
 // stroke toward the real stroke time so it can't drift away (a hard resync
 // shows as one bogus value). After a pause it restarts from real time.
-// Replayed on the OC1 session: per-stroke 41.9 +- 6.5/min -> 41.1 +- 2.8.
-constexpr int SMOOTH_N = 8;
+// Replayed on the OC1 session: per-stroke 41.9 +- 6.5/min -> 41.2 +- 3.6 (N=4;
+// N=8 gave +- 2.8 but felt too slow: a 40->55 step takes 7 strokes vs 4).
+constexpr int SMOOTH_N = 4;
 constexpr uint32_t PAUSE_MS = 2500;     // longer interval = pause, not a stroke rate
 constexpr float PULL = 0.05f;           // fraction of the drift corrected per stroke
 constexpr uint32_t MAX_DRIFT_MS = 5000; // safety: resync if it still drifts this far

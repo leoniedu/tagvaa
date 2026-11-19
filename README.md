@@ -208,11 +208,11 @@ monitor, or hold the front button 5 s.
 - **Smoothing (2026-11-19):** the head unit shows 60 / (time between the
   last two strokes), so it jumped with every stroke (water session:
   41.9 ± 6.5/min, 24–90). The stroke count stays exact; the reported stroke
-  times are spaced at the mean of the last 8 intervals without the
+  times are spaced at the mean of the last 4 intervals without the
   shortest and longest, pulled 5 % per stroke toward real time, restarting
-  after a pause (> 2.5 s). Replayed on the water session: 41.1 ± 2.8/min
-  (31–54), reported times within 1.1 s of real ones. Reacts to a rate
-  change in about 4–5 strokes.
+  after a pause (> 2.5 s). Replayed on the water session: 41.2 ± 3.6/min
+  (29–58). A 40 → 55/min change shows within 4 strokes. (8 intervals gave
+  ± 2.8 but took 7 strokes and felt too slow on the CS300.)
 
 ### T — 3.3 V rail test (`t_rail.uf2`)
 
