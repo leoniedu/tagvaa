@@ -160,7 +160,7 @@ gh release download 2.6.1 -R meshtastic/nRF52_Bootloader -p meshtastic_factory_e
 | 3 | `m3_csc` | BLE CSC sensor, fixed 60 rpm (go/no-go) | ✅ **GO** 2026-11-17: CS300 shows 60 rpm |
 | 4 | `m4_logger` | 100 Hz accel over BLE UART (FIFO) + battery lines + R script | ✅ 2026-11-17: Mac and iPhone (Bluefruit Connect), 0 lost, ~100.6 Hz; boat session pending |
 | 5 | `m5_stroke` | On-device stroke detector → CSC cadence, GNSS off | replay-tested; bench ✅; **CS300 shows cadence** ✅ 2026-11-19; smoothing added; water pending |
-| 5b | `m5_acf` | Same, but the rate comes from a running-autocorrelation tracker; blanks outside 30–110/min | flashed 2026-11-19; bench: firmware == Mac replay; real session pending |
+| 5b | `m5_acf` | Same, but the rate comes from a running-autocorrelation tracker; blanks outside 24–110/min (was 30) | flashed 2026-11-19; bench: firmware == Mac replay; real session pending |
 | 6 | — | Power management | later |
 | — | `docs/junction_box.md` | Sidequest: solar + battery junction box | paper design |
 | T | `t_rail` | Test: what is on the switched 3.3 V rail | ✅ run 2026-11-17: GNSS on the rail, accelerometer not |
@@ -244,9 +244,27 @@ meaningful as a cadence.
 - Known limits: starts ~10 s after paddling begins, keeps a stale rhythm 4–5 s after a
   stop, slow to follow a doubling of the rate (7 s); cannot tell wave rhythm inside the
   range from paddling; rates around 15–20/min are not reliably caught.
+- **Second water session (OC1, 2026-11-21, CS300 FIT vs watch; no raw Tag data).** 12 s
+  windows while paddling steadily: bias −0.05, MAE 2.35 spm, 76 % within ±3. But after
+  every stop the CS300 kept the old rate 15–25 s (hull motion after a stop stayed above
+  `gate`, and the decaying correlation memory kept the rhythm), and slow paddling at
+  31–34/min dropped out when estimates dipped under the 30/min floor.
+- **Fix (2026-11-21):** stop relative to the paddler's own level: when the 1 s rms stays
+  below 0.45 × the paddling rms (8 s level) for 1.6 s, the rhythm is dropped and the
+  correlation memory cleared; a restart then needs 0.5 × that level (fading over 20 s).
+  Floor lowered to 24/min. Checked with `experiments/gen_field.py` (stops in seas of
+  10–55 mg rms, swell at 45/min, slow 20–34/min, sprint, easing off) scored by
+  `experiments/field_eval.R` (replay of the firmware classes, old vs new settings):
+  stop → blank 19 → 4–8 s where the sea after a stop is < ~0.45 × paddling, no change in
+  rougher sea (17–19 s); 25/min shown 0 → 86 %, 28/min 4 → 98 %; glitches +1–3 points in
+  rough sea; no blanks when the stroke amplitude halves. Real 45 min of 2026-11-18:
+  identical to before (0 extra blank seconds; 1.6 s confirmation chosen because 0.6 s
+  blanked a 6 s stretch of light strokes there). Rest shown in the simulated sea stays
+  high: the simulated sea is more rhythmic than the water (the CS300 stayed at 0 during
+  the real rests once blank).
 - Replay on the Mac (same classes as the firmware, float):
   `c++ -std=c++17 -O2 -I lib/stroke lib/stroke/stroke_detector.cpp lib/stroke/acf_tracker.cpp test/host/acf_replay.cpp -o .pio/acf_replay`
-  then `.pio/acf_replay < data/session_window.csv`. Against the double-precision lab it
+  then `.pio/acf_replay [key=value ...] < data/session_window.csv` (args override `AcfParams`). Against the double-precision lab it
   agrees to 0.7 strokes/min on the real session (two seconds at a rate jump differ by
   more) and within one event in the count.
 - Bench on the Tag (hand sliding, 3 min): device and Mac replay of the recorded raw

@@ -29,11 +29,18 @@ struct AcfParams {
     int estEvery = 5;      // new estimate every estEvery 25 Hz steps (5 = 0.2 s)
     int kmin = 8, kmax = 80;        // lags searched at 25 Hz
     int octM = 6;                   // octave check looks at best/2 .. best/octM
-    float rmin = 30.0f, rmax = 110.0f; // strokes/min the display supports
+    float rmin = 24.0f, rmax = 110.0f; // strokes/min the display supports
     int outN = 2;                   // consecutive out-of-range estimates (0.2 s each) before blanking
     float inFrac = 0.5f;   // a supported rhythm is chosen if its correlation >= inFrac * the strongest anywhere
     float lowOct = 0.5f;   // slower-than-rmin period: a supported fraction of it wins at >= lowOct * its correlation
     float oobOct = 0.75f;  // estimate is unreliable if a fraction above rmax has a peak >= oobOct * the chosen one
+    // Stop detection relative to the paddler's own level (hull motion after a stop can stay
+    // above `gate` while the decaying memory of the strokes keeps the old rhythm alive).
+    float relStop = 0.45f; // stopped when the 1 s rms < relStop * paddling rms (0 = off) ...
+    int stopN = 8;         // ... for this many consecutive estimates; the memory is then cleared
+    float lvlTau = 8.0f;   // s, paddling rms level, followed while a rhythm is tracked
+    float relStart = 0.5f; // after such a stop, a restart needs 1 s rms >= relStart * that level ...
+    float armTau = 20.0f;  // s, ... which fades with this time constant
 };
 
 class AcfTracker
@@ -65,6 +72,8 @@ class AcfTracker
     float raw_[5] = {0, 0, 0, 0, 0};
     int nraw_ = 0, outCount_ = 0;
     float rate_ = 0, weak_ = 0;
+    float lvl_ = 0, arm_ = 0, lvlDiv_, armDecay_;
+    int lowCount_ = 0;
     bool valid_ = false;
     float phase_ = 0;
     bool wasValid_ = false;

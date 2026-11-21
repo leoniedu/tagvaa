@@ -13,6 +13,8 @@ AcfTracker::AcfTracker(const AcfParams &p) : P(p)
 {
     lam_ = expf(-1.0f / (P.tau * 25.0f));
     esDiv_ = P.esTau * 100.0f;
+    lvlDiv_ = P.lvlTau * 100.0f;
+    armDecay_ = expf(-0.04f * P.estEvery / P.armTau);
     P.kmin = imax(P.kmin, KLO);
     P.kmax = imin(P.kmax, KHI);
     memset(R_, 0, sizeof R_);
@@ -21,6 +23,20 @@ AcfTracker::AcfTracker(const AcfParams &p) : P(p)
 
 void AcfTracker::estimate()
 {
+    arm_ *= armDecay_;
+    if (valid_ && P.relStop > 0) {
+        lowCount_ = (es_ < P.relStop * P.relStop * lvl_) ? lowCount_ + 1 : 0;
+        if (lowCount_ >= P.stopN) { // paddling stopped: forget the old rhythm
+            arm_ = lvl_;
+            memset(R_, 0, sizeof R_);
+            R0_ = 0;
+            valid_ = false;
+            nraw_ = 0;
+            outCount_ = 0;
+            lowCount_ = 0;
+            return;
+        }
+    }
     if (R0_ <= 1e-12f || sqrtf(es_) < P.gate) {
         valid_ = false;
         nraw_ = 0;
@@ -122,7 +138,10 @@ void AcfTracker::estimate()
     }
     outCount_ = 0;
     if (!valid_) {
+        if (es_ < P.relStart * P.relStart * arm_) return; // still the motion left after a stop
         valid_ = true;
+        lvl_ = es_;
+        lowCount_ = 0;
         rate_ = med;
     } else {
         rate_ += P.alpha * (med - rate_);
@@ -132,6 +151,7 @@ void AcfTracker::estimate()
 bool AcfTracker::update(float x, uint32_t samples)
 {
     es_ += (x * x - es_) / esDiv_;
+    if (valid_) lvl_ += (x * x - lvl_) / lvlDiv_;
     acc_ += x;
     if (++acnt_ < 4) return false;
     float xd = acc_ * 0.25f;
