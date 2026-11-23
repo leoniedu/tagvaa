@@ -123,6 +123,11 @@ p { margin: 0 0 1rem; max-width: var(--measure); }
 .reasons { max-width: var(--measure); margin: 1.5rem 0 0; }
 .reasons dt { font-weight: 700; color: var(--deep); }
 .reasons dd { margin: 0.15rem 0 1.1rem; color: var(--muted); }
+.compare { width: 100%; max-width: var(--measure); border-collapse: collapse; margin: 1.5rem 0 1rem; }
+.compare th, .compare td { text-align: left; vertical-align: top; padding: 0.75rem 1rem 0.75rem 0; border-top: 1px solid #c4dcd8; }
+.compare thead th { border-top: 0; color: var(--muted); font-weight: 400; font-size: 0.95rem; }
+.compare tbody th { color: var(--deep); white-space: nowrap; }
+.compare td.price { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .limits { padding-left: 1.2rem; max-width: var(--measure); }
 .limits li { margin-bottom: 0.5rem; }
 
@@ -157,6 +162,10 @@ footer p { margin-bottom: 0.6rem; }
 
 @media (max-width: 560px) {
   .trace { height: 200px; }
+  .compare thead { display: none; }
+  .compare tr { display: block; border-top: 1px solid #c4dcd8; padding: 0.75rem 0; }
+  .compare th, .compare td { display: block; border: 0; padding: 0.1rem 0; }
+  .compare td.price { color: var(--muted); }
 }
 </style>
 </head>
@@ -245,6 +254,22 @@ footer p { margin-bottom: 0.6rem; }
         <li>Waves that roll at a paddling-like rhythm can't be told apart from strokes.</li>
         <li>Very slow paddling, around 15–20 strokes per minute, is not reliably caught.</li>
       </ul>
+    </div>
+  </section>
+
+  <section id="alternatives">
+    <div class="wrap">
+      <h2>Ready-made alternatives</h2>
+      <p>If you want something finished, waterproof and supported, buy one of these instead. Paddle Stroke is the cheap, do-it-yourself route: you flash the firmware yourself and use a bike computer you may already have.</p>
+      <table class="compare">
+        <thead><tr><th scope="col">Option</th><th scope="col">What it is</th><th scope="col">About</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><a href="https://westcoastpaddlesports.com/products/speedcoach-oc">NK SpeedCoach OC&nbsp;2</a></th><td>A stroke-rate and speed display made for outrigger canoes, with GPS and distance per stroke.</td><td class="price">US$470</td></tr>
+          <tr><th scope="row"><a href="https://threeoceans.co/products/vaaka-cadence-sensor">Vaaka Cadence</a></th><td>A waterproof sensor on the paddle that sends stroke rate over Bluetooth and ANT+ to a watch or bike computer.</td><td class="price">US$225</td></tr>
+          <tr><th scope="row">Paddle Stroke</th><td>Experimental firmware for a WisMesh Tag fixed to the boat; any Bluetooth head unit shows the rate.</td><td class="price">US$39 + head unit</td></tr>
+        </tbody>
+      </table>
+      <p>Prices are from one retailer each and will vary.</p>
     </div>
   </section>
 

@@ -30,6 +30,14 @@ that paired earlier may still show the old name until it is forgotten.
 
 Project page: <https://leoniedu.github.io/tagvaa/>
 
+## Ready-made alternatives
+
+If you want something finished, waterproof and supported:
+[NK SpeedCoach OC 2](https://westcoastpaddlesports.com/products/speedcoach-oc) (outrigger stroke-rate and GPS speed display, about
+US$470) or the [Vaaka Cadence](https://threeoceans.co/products/vaaka-cadence-sensor) sensor (on the paddle, Bluetooth and
+ANT+, about US$225). This project is the cheap, experimental route for people
+who already own a Bluetooth head unit.
+
 ## Which firmware
 
 | File | Use it for |
