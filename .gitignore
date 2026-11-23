@@ -4,3 +4,9 @@
 firmware/
 *.png
 data/
+
+# iOS
+ios/*.xcodeproj/
+ios/RecorderCore/.build/
+ios/RecorderCore/.swiftpm/
+.superpowers/
