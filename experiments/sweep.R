@@ -2,7 +2,7 @@
 # Usage: Rscript experiments/sweep.R SYNTH_DIR real_window.csv
 # Prints one row per setting: step_s (response to a rate change), steady_sd
 # (display jitter on steady stretches), chop_mae / chop_glitch (heavy waves),
-# real_sd / real_glitch (the OC1 session, jitter against its own 61 s median).
+# real_sd / real_glitch (the OC6 session, jitter against its own 61 s median).
 suppressMessages(library(tidyverse))
 suppressMessages(library(slider))
 args <- commandArgs(trailingOnly = TRUE)

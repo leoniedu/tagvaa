@@ -1,4 +1,4 @@
-"""Synthetic recordings of conditions seen on the water on 2026-11-21 (OC1, CS300 + watch):
+"""Synthetic recordings of conditions seen on the water on 2026-11-21 (OC6, CS300 + watch):
 stops with hull motion that does not die out, swell at a stroke-like rhythm, slow paddling
 near 30/min, a sudden sprint, and a paddler who eases off.
 

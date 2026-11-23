@@ -2,7 +2,7 @@
 
 Custom firmware for the **RAK WisMesh Tag** that turns it into a Bluetooth LE
 Cycling Speed & Cadence sensor, so a COOSPO CS300 shows paddle strokes per
-minute as "cadence" on an outrigger canoe (first tests in an OC1, target OC6).
+minute as "cadence" on an outrigger canoe (tested in an OC6; OC1 not yet tested).
 
 It **replaces Meshtastic**: while it runs, the Tag is no longer a tracker or a
 mesh node. The GPS is powered off, the LoRa radio is never used, and only the

@@ -103,7 +103,7 @@ two strokes.
 Synthetic check (10 min, varying 55–80 spm, rotated Tag, reference clock
 4 s off): 576 strokes detected vs ~575 true; after alignment MAE 0.3 spm.
 
-**First water session (OC1, 2026-11-18, 18:41–19:26, files
+**First water session (OC6, 2026-11-18, 18:41–19:26, files
 `data/oc1_20261118_*`, not committed).** Tag recorded via Bluefruit
 Connect for 1 h 43 min (619 932 samples, 3 lost); Apple Watch WorkOutDoors
 in *running* mode by mistake (its FIT `cadence` is then strides/min, i.e.
@@ -125,7 +125,7 @@ lay flat (z up); surge axis = Tag x.
   was ~41/min (relaxed paddling); the app's on-screen ~85 doubles it.
 - Battery 3957 → 3895 mV over 1 h 43 min on battery (logger, GNSS on).
 
-First water test (OC1): Tag rigidly fixed to the hull, phone (Bluefruit
+First water test (OC6): Tag rigidly fixed to the hull, phone (Bluefruit
 Connect, recording) and watch (paddling activity with stroke rate) both
 running; ~30 s still at start and end; 10+ min including steady pieces at
 different rates. Export the Bluefruit log and the watch activity (TCX or

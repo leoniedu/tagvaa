@@ -29,7 +29,7 @@ wrong along the way. Hardware notes and the rail test are in
   at 1 s; a peak past 0.6 s that is at least 80 % of the recent typical
   peak still counts, so sudden speed-ups don't lock at half rate). Plain
   C++, no Arduino.
-- Replay on the Mac (`test/host/stroke_replay.cpp`) of the 45-min OC1
+- Replay on the Mac (`test/host/stroke_replay.cpp`) of the 45-min OC6
   session: **1833 strokes vs 1828 in R**, 94 % within 0.3 s of an R stroke.
 - **Half-rate lock (2026-11-19):** on the CS300 the rate could not get past
   ~50/min when speeding up. After a slower stretch the adaptive minimum gap
@@ -87,7 +87,7 @@ period every 0.2 s (octave check, parabola, median + EMA) and blanks rhythms out
 integrated phase of that rate, so they are evenly spaced; the stroke *count* is only
 meaningful as a cadence.
 
-- Real OC1 session (45 min, Mac lab): jitter 1.3 vs 3.5 strokes/min for the peak
+- Real OC6 session (45 min, Mac lab): jitter 1.3 vs 3.5 strokes/min for the peak
   logic, 0.7 % vs 9.2 % of seconds off by more than 15 %. Settings tuned on separate
   train / validation / fresh synthetic sets and two halves of the real session
   (`experiments/tune.R`); out-of-range blanking 92–100 % for 115–150/min and 25–28/min,
@@ -95,7 +95,7 @@ meaningful as a cadence.
 - Known limits: starts ~10 s after paddling begins, keeps a stale rhythm 4–5 s after a
   stop, slow to follow a doubling of the rate (7 s); cannot tell wave rhythm inside the
   range from paddling; rates around 15–20/min are not reliably caught.
-- **Second water session (OC1, 2026-11-21, CS300 FIT vs watch; no raw Tag data).** 12 s
+- **Second water session (OC6, 2026-11-21, CS300 FIT vs watch; no raw Tag data).** 12 s
   windows while paddling steadily: bias −0.05, MAE 2.35 spm, 76 % within ±3. But after
   every stop the CS300 kept the old rate 15–25 s (hull motion after a stop stayed above
   `gate`, and the decaying correlation memory kept the rhythm), and slow paddling at
