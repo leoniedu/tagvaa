@@ -80,7 +80,7 @@ Export. The recorder exists to make losing a session hard.
 
 **File format**
 - One CSV file per recording, named with the Tag ID and start time, e.g.
-  `tagvaa-3F2A_2026-11-25T06-12-04.csv`.
+  `tagvaa-honu_A_2026-11-25T06-12-04.csv`.
 - Same layout as the Bluefruit export, so `unpack_bluefruit()` reads it
   unchanged: header `Timestamp,Mode,Data`, one row per BLE packet with
   `Mode = RX`, `Timestamp` as phone time of day with milliseconds.
@@ -94,10 +94,22 @@ Export. The recorder exists to make losing a session hard.
   without watches.
 
 **Firmware change (tagvaa, all BLE firmwares)**
-- Advertise as `tagvaa XXXX` and `tagvaa log XXXX`, where `XXXX` is the last
-  four hex digits of the Tag's Bluetooth address. The ID is the hull's
-  identity in the data. Head units and phones paired with plain `tagvaa`
-  must pair again.
+- Advertise as `tagvaa honu_A` and `tagvaa log honu_A`: an ocean word plus a
+  letter, both derived from the Tag's Bluetooth address, so every Tag has a
+  stable name with no setup.
+  - Word: 6 bits of the address pick one of 64 short Hawaiian ocean words
+    (honu, nalu, mano, naia, hoku, makani, moana, …), written in plain ASCII
+    (no ʻokina or macrons, which head units may not show), at most 6 letters.
+  - Letter: 4 other bits pick A–P, so the suffix is always a letter.
+  - 64 × 16 = 1024 names; a clash between two Tags in one club is unlikely,
+    and the full address is still written in the recording's `INFO` rows, so
+    a clash never mixes up data.
+  - The word list is fixed once shipped: reordering or editing it would
+    rename every Tag.
+- The name is the hull's identity in the data. Head units and phones paired
+  with plain `tagvaa` must pair again.
+- Later upgrade, not in this job: set the canoe's real name from the app and
+  store it on the Tag.
 
 **Where**
 - App in `ios/` in the tagvaa repo, XcodeGen `project.yml`, iOS 17,
