@@ -125,13 +125,6 @@ p { margin: 0 0 1rem; max-width: var(--measure); }
 .limits { padding-left: 1.2rem; max-width: var(--measure); }
 .limits li { margin-bottom: 0.5rem; }
 
-/* Status timeline */
-.status { width: 100%; max-width: var(--measure); border-collapse: collapse; margin-top: 1.5rem; }
-.status th, .status td { text-align: left; vertical-align: top; padding: 0.7rem 0.75rem 0.7rem 0; border-top: 1px solid #c4dcd8; }
-.status th { font-weight: 700; white-space: nowrap; }
-.status td.state { white-space: nowrap; color: var(--muted); }
-.status tr.done td.state { color: var(--lagoon); font-weight: 700; }
-.status tr.now td.state { color: #8a5a00; font-weight: 700; }
 
 /* Get started */
 .warning {
@@ -163,7 +156,6 @@ footer p { margin-bottom: 0.6rem; }
 
 @media (max-width: 560px) {
   .trace { height: 200px; }
-  .status td.state { white-space: normal; }
 }
 </style>
 </head>
@@ -194,6 +186,7 @@ footer p { margin-bottom: 0.6rem; }
       <p>Paddle Stroke is open firmware for the <a href="https://docs.rakwireless.com/product-categories/meshtastic/wismesh-tag/quickstart/">RAK WisMesh Tag</a>, a small Meshtastic tracker with an accelerometer and Bluetooth. Fix the Tag firmly to the boat and it acts as a standard Bluetooth cycling cadence sensor. Each paddle stroke counts as one pedal turn, so a bike computer's cadence field shows your stroke rate.</p>
       <p><strong>It replaces Meshtastic entirely.</strong> While this firmware is on the Tag, it is no longer a tracker or a mesh node: the GPS is powered off, the LoRa radio is never used, and nothing is sent or received over the mesh. What's left is the accelerometer and Bluetooth. To get the tracker back, you flash stock Meshtastic again.</p>
       <p>It was built and tested with a COOSPO CS300 head unit, first in an OC1 and with an OC6 as the goal. Any device that pairs with a Bluetooth cadence sensor should work the same way.</p>
+      <p><strong>Status: experimental.</strong> The current firmware (<code>m5_acf</code>) works on the bench and is being tested on the water. Power saving isn't done yet.</p>
     </div>
   </section>
 
@@ -251,24 +244,6 @@ footer p { margin-bottom: 0.6rem; }
         <li>Waves that roll at a paddling-like rhythm can't be told apart from strokes.</li>
         <li>Very slow paddling, around 15–20 strokes per minute, is not reliably caught.</li>
       </ul>
-    </div>
-  </section>
-
-  <section id="status">
-    <div class="wrap">
-      <h2>Status</h2>
-      <p>The project is built in small, separately flashable steps. Each one has its own firmware file.</p>
-      <table class="status">
-        <tbody>
-          <tr class="done"><th scope="row"><code>m1_hello</code></th><td>USB serial and LEDs</td><td class="state">Done</td></tr>
-          <tr class="done"><th scope="row"><code>m2_accel</code></th><td>Accelerometer readings</td><td class="state">Done</td></tr>
-          <tr class="done"><th scope="row"><code>m3_csc</code></th><td>Bluetooth cadence sensor at a fixed 60/min</td><td class="state">Done</td></tr>
-          <tr class="done"><th scope="row"><code>m4_logger</code></th><td>Raw 100 Hz data logger over Bluetooth</td><td class="state">Done</td></tr>
-          <tr class="done"><th scope="row"><code>m5_stroke</code></th><td>Stroke counting by peak detection</td><td class="state">Fallback</td></tr>
-          <tr class="now"><th scope="row"><code>m5_acf</code></th><td>Stroke rate from the autocorrelation tracker</td><td class="state">Water testing</td></tr>
-          <tr><th scope="row">Next</th><td>Power management for long sessions</td><td class="state">Planned</td></tr>
-        </tbody>
-      </table>
     </div>
   </section>
 
