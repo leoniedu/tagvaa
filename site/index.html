@@ -189,6 +189,7 @@ footer p { margin-bottom: 0.6rem; }
     <div class="wrap">
       <h2>What it is</h2>
       <p>Paddle Stroke is open firmware for the <a href="https://docs.rakwireless.com/product-categories/meshtastic/wismesh-tag/quickstart/">RAK WisMesh Tag</a>, a small Meshtastic tracker with an accelerometer and Bluetooth. Fix the Tag to the hull and it acts as a standard Bluetooth cycling cadence sensor. Each paddle stroke counts as one pedal turn, so a bike computer's cadence field shows your stroke rate.</p>
+      <p><strong>It replaces Meshtastic entirely.</strong> While this firmware is on the Tag, it is no longer a tracker or a mesh node: the GPS is powered off, the LoRa radio is never used, and nothing is sent or received over the mesh. What's left is the accelerometer and Bluetooth. To get the tracker back, you flash stock Meshtastic again.</p>
       <p>It was built and tested with a COOSPO CS300 head unit, first in an OC1 and with an OC6 as the goal. Any device that pairs with a Bluetooth cadence sensor should work the same way.</p>
     </div>
   </section>
@@ -250,6 +251,7 @@ footer p { margin-bottom: 0.6rem; }
       <div class="warning" role="note">
         <p><strong>Use at your own risk.</strong> This is experimental firmware for a device it wasn't made for. Flashing it can leave your Tag unusable, erase your Meshtastic settings and keys, or drain the battery. Back up first and keep the <a href="https://github.com/leoniedu/tagvaa#reverting-to-stock-meshtastic">steps to revert to stock</a> at hand. There is no warranty.</p>
       </div>
+      <p>Flashing this firmware removes Meshtastic. Until you flash it back, the Tag has no GPS, no LoRa and no mesh.</p>
       <ol class="steps">
         <li>
           <strong>Build the firmware.</strong> PlatformIO goes into a local virtual environment; nothing is installed system-wide.
