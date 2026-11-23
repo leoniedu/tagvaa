@@ -6,7 +6,11 @@ firmware/
 data/
 
 # iOS
-ios/*.xcodeproj/
+# The generated project is committed (as in yachtvaa): Xcode Cloud clones and builds it
+# without XcodeGen. `make -C ios check-project` reports drift from project.yml.
+# Xcode's window positions and open tabs are not.
+ios/**/xcuserdata/
+__pycache__/
 ios/RecorderCore/.build/
 ios/RecorderCore/.swiftpm/
 .superpowers/

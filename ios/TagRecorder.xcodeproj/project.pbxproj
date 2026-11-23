@@ -1,0 +1,394 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		619991D7AB5A38EE2AE3EFE2 /* TagRecorderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4106D76B77957975AA5CCA15 /* TagRecorderApp.swift */; };
+		855DC1DFE3A874265CF85653 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90D19AA012B2C3333B81A984 /* RecordView.swift */; };
+		861A33FEF1FDD17A1556E1D1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9A480E03402E9BE5BABAD0BA /* Assets.xcassets */; };
+		9895D4E4F65C0EB9C9FB85AC /* BLETagLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 736FE258FFD1330381DF81A4 /* BLETagLink.swift */; };
+		A5F5BA2097CE53959B45F1F8 /* RecordingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1EFDAFE2109BB6026A8569F /* RecordingsView.swift */; };
+		B880BBD8DD7A1FA51C53FCCE /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4056DC9F86A80C8625A2A145 /* AppModel.swift */; };
+		D29DFFF46ABCD933FA685CDB /* RecorderCore in Frameworks */ = {isa = PBXBuildFile; productRef = B4F01512AE5743C4255E254D /* RecorderCore */; };
+		D64E3BA9828A71C3424C0948 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679E638444273619DC6484E3 /* SessionStore.swift */; };
+		E802CC8B2070DB8119A34C62 /* HoldToStopButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DA43B285B5FCA910B18AC64 /* HoldToStopButton.swift */; };
+		E98AD41E4CF0364420F5AF91 /* PhoneGPS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 298C169E739238468452EDE2 /* PhoneGPS.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		298C169E739238468452EDE2 /* PhoneGPS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneGPS.swift; sourceTree = "<group>"; };
+		4056DC9F86A80C8625A2A145 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		4106D76B77957975AA5CCA15 /* TagRecorderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagRecorderApp.swift; sourceTree = "<group>"; };
+		44A40E98E0F0CA778A2866F8 /* TagRecorder.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TagRecorder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		679E638444273619DC6484E3 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		736FE258FFD1330381DF81A4 /* BLETagLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLETagLink.swift; sourceTree = "<group>"; };
+		7948E4E598462A348E0908B0 /* RecorderCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RecorderCore; path = RecorderCore; sourceTree = SOURCE_ROOT; };
+		8DA43B285B5FCA910B18AC64 /* HoldToStopButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoldToStopButton.swift; sourceTree = "<group>"; };
+		90D19AA012B2C3333B81A984 /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
+		9A480E03402E9BE5BABAD0BA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A7862C0F799913E8960F8069 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		F1EFDAFE2109BB6026A8569F /* RecordingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingsView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		65DA94A8AD30A3024AE36B34 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D29DFFF46ABCD933FA685CDB /* RecorderCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		07565ABB7F121A678660686C /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				8DA43B285B5FCA910B18AC64 /* HoldToStopButton.swift */,
+				F1EFDAFE2109BB6026A8569F /* RecordingsView.swift */,
+				90D19AA012B2C3333B81A984 /* RecordView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		7D38747C0CB2B1243FB1A2A5 /* TagRecorder */ = {
+			isa = PBXGroup;
+			children = (
+				4056DC9F86A80C8625A2A145 /* AppModel.swift */,
+				9A480E03402E9BE5BABAD0BA /* Assets.xcassets */,
+				736FE258FFD1330381DF81A4 /* BLETagLink.swift */,
+				A7862C0F799913E8960F8069 /* Info.plist */,
+				298C169E739238468452EDE2 /* PhoneGPS.swift */,
+				679E638444273619DC6484E3 /* SessionStore.swift */,
+				4106D76B77957975AA5CCA15 /* TagRecorderApp.swift */,
+				07565ABB7F121A678660686C /* Views */,
+			);
+			path = TagRecorder;
+			sourceTree = "<group>";
+		};
+		C8C68A47B413F886DD6ABF92 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				7948E4E598462A348E0908B0 /* RecorderCore */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		CD9CB1084489DF3C21EA1189 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				44A40E98E0F0CA778A2866F8 /* TagRecorder.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E8A5B7BA5AB2A02157EBAFC7 = {
+			isa = PBXGroup;
+			children = (
+				C8C68A47B413F886DD6ABF92 /* Packages */,
+				7D38747C0CB2B1243FB1A2A5 /* TagRecorder */,
+				CD9CB1084489DF3C21EA1189 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1523372FBDB834DCD4D802A5 /* TagRecorder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2AF72970289C2DFB04692536 /* Build configuration list for PBXNativeTarget "TagRecorder" */;
+			buildPhases = (
+				58041A944B7800BB708C76E1 /* Sources */,
+				9638C8AC98A36673578376EA /* Resources */,
+				65DA94A8AD30A3024AE36B34 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TagRecorder;
+			packageProductDependencies = (
+				B4F01512AE5743C4255E254D /* RecorderCore */,
+			);
+			productName = TagRecorder;
+			productReference = 44A40E98E0F0CA778A2866F8 /* TagRecorder.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		675233127F6C7E3108BBBEE3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					1523372FBDB834DCD4D802A5 = {
+						DevelopmentTeam = 994QVUGPX7;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 7CC56BCFF3255CB920B7C745 /* Build configuration list for PBXProject "TagRecorder" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = E8A5B7BA5AB2A02157EBAFC7;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B17AB3C820B2EC4A2EE5F137 /* XCLocalSwiftPackageReference "RecorderCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = CD9CB1084489DF3C21EA1189 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1523372FBDB834DCD4D802A5 /* TagRecorder */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		9638C8AC98A36673578376EA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				861A33FEF1FDD17A1556E1D1 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		58041A944B7800BB708C76E1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B880BBD8DD7A1FA51C53FCCE /* AppModel.swift in Sources */,
+				9895D4E4F65C0EB9C9FB85AC /* BLETagLink.swift in Sources */,
+				E802CC8B2070DB8119A34C62 /* HoldToStopButton.swift in Sources */,
+				E98AD41E4CF0364420F5AF91 /* PhoneGPS.swift in Sources */,
+				855DC1DFE3A874265CF85653 /* RecordView.swift in Sources */,
+				A5F5BA2097CE53959B45F1F8 /* RecordingsView.swift in Sources */,
+				D64E3BA9828A71C3424C0948 /* SessionStore.swift in Sources */,
+				619991D7AB5A38EE2AE3EFE2 /* TagRecorderApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		752E446A24B44C5764F18EAF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
+				DEVELOPMENT_TEAM = 994QVUGPX7;
+				INFOPLIST_FILE = TagRecorder/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"MACOSX_DEPLOYMENT_TARGET[sdk=macosx*]" = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eleon.tagvaa.recorder;
+				PRODUCT_NAME = tagvaa;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		CB72210BAECB724ADCB76801 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		F108339429805E296733F4EA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
+				DEVELOPMENT_TEAM = 994QVUGPX7;
+				INFOPLIST_FILE = TagRecorder/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"MACOSX_DEPLOYMENT_TARGET[sdk=macosx*]" = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eleon.tagvaa.recorder;
+				PRODUCT_NAME = tagvaa;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FB3DE596E46B3E97E97F4F83 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2AF72970289C2DFB04692536 /* Build configuration list for PBXNativeTarget "TagRecorder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F108339429805E296733F4EA /* Debug */,
+				752E446A24B44C5764F18EAF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7CC56BCFF3255CB920B7C745 /* Build configuration list for PBXProject "TagRecorder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CB72210BAECB724ADCB76801 /* Debug */,
+				FB3DE596E46B3E97E97F4F83 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		B17AB3C820B2EC4A2EE5F137 /* XCLocalSwiftPackageReference "RecorderCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = RecorderCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B4F01512AE5743C4255E254D /* RecorderCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RecorderCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 675233127F6C7E3108BBBEE3 /* Project object */;
+}
