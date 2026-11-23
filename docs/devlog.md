@@ -17,6 +17,7 @@ wrong along the way. Hardware notes and the rail test are in
 | 5b | `m5_acf` | Same, but the rate comes from a running-autocorrelation tracker; blanks outside 24–110/min (was 30) | flashed 2026-11-19; bench: firmware == Mac replay; real session pending |
 | 6 | — | Power management | later |
 | — | `docs/junction_box.md` | Sidequest: solar + battery junction box | paper design |
+| — | — | Idea: stroke rate as a Meshtastic module ([below](#possible-future-a-meshtastic-module)) | not started |
 | T | `t_rail` | Test: what is on the switched 3.3 V rail | ✅ run 2026-11-17: GNSS on the rail, accelerometer not |
 
 ### 5 — Stroke detector + cadence (`m5_stroke.uf2`)
@@ -176,3 +177,28 @@ then on the CS300 add a cadence sensor: it should find "Paddle Stroke" and show
 ### 4 — 100 Hz logger (`m4_logger.uf2`)
 
 See [analysis.md](analysis.md#100-hz-logger-m4_loggeruf2).
+
+## Possible future: a Meshtastic module
+
+Idea, not started (2026-11-23). Instead of replacing Meshtastic, add the
+stroke detector and tracker (`lib/stroke`, plain C++) as a module in a
+Meshtastic fork, plus a Cycling Speed & Cadence GATT service, so the Tag
+stays a tracker and mesh node while the head unit shows cadence.
+
+What it would add:
+- Position over the mesh while paddling (safety offshore, escort boat).
+- Stroke rate shared over the mesh to a coach or escort, not only to the
+  CS300.
+- One firmware for both jobs; no reflashing.
+
+What it would cost:
+- A fork of a large, fast-moving codebase, rebased on every Meshtastic
+  release; a CSC service is unlikely to be accepted upstream.
+- The CS300 shares the BLE radio with Meshtastic's phone connection; M5
+  showed the CS300 is picky about connection parameters (the 30 s drops).
+- GPS and LoRa stay on: no milestone-6 power savings.
+
+To check first (unverified assumptions): Meshtastic's nRF52 build uses
+Bluefruit, as we do, and already reads the accelerometer for motion
+features; how hard it is to add a second BLE service next to Meshtastic's
+own.

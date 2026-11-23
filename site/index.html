@@ -186,7 +186,7 @@ footer p { margin-bottom: 0.6rem; }
       <p>Paddle Stroke is open firmware for the <a href="https://docs.rakwireless.com/product-categories/meshtastic/wismesh-tag/quickstart/">RAK WisMesh Tag</a>, a small Meshtastic tracker with an accelerometer and Bluetooth. Fix the Tag firmly to the boat and it acts as a standard Bluetooth cycling cadence sensor. Each paddle stroke counts as one pedal turn, so a bike computer's cadence field shows your stroke rate.</p>
       <p><strong>It replaces Meshtastic entirely.</strong> While this firmware is on the Tag, it is no longer a tracker or a mesh node: the GPS is powered off, the LoRa radio is never used, and nothing is sent or received over the mesh. What's left is the accelerometer and Bluetooth. To get the tracker back, you flash stock Meshtastic again.</p>
       <p>It was built and tested with a COOSPO CS300 head unit, first in an OC1 and with an OC6 as the goal. Any device that pairs with a Bluetooth cadence sensor should work the same way.</p>
-      <p><strong>Status: experimental.</strong> The current firmware (<code>m5_acf</code>) works on the bench and is being tested on the water. Power saving isn't done yet.</p>
+      <p><strong>Status: experimental.</strong> The current firmware (<code>m5_acf</code>) works on the bench and is being tested on the water. Power saving isn't done yet. One idea for later is to run the stroke detector inside Meshtastic, so the Tag stays a tracker and mesh node while it reports stroke rate (<a href="https://github.com/leoniedu/tagvaa/blob/main/docs/devlog.md#possible-future-a-meshtastic-module">trade-offs</a>).</p>
     </div>
   </section>
 
