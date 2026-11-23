@@ -37,7 +37,7 @@ ehu lele holo pae au nenue humu kumu
 palani maiko nohu hapuu ulaula makau ina piko
 ```
 
-**Bits:** with the address as delivered by `Bluefruit.getAddr(mac)` (`mac[0]` least significant): word index = `mac[0] & 0x3F`; letter index = `(mac[0] >> 6) | ((mac[1] & 0x03) << 2)`, letter = `'A' + index`.
+**Bits:** from the chip's factory device address, read directly from `NRF_FICR->DEVICEADDR[0]` and `[1]` (not from the Bluetooth stack, so a future custom address or privacy mode cannot rename a Tag). As 6 bytes, least significant first (`id[0..3]` = `DEVICEADDR[0]`, `id[4..5]` = low 16 bits of `DEVICEADDR[1]`): word index = `id[0] & 0x3F`; letter index = `(id[0] >> 6) | ((id[1] & 0x03) << 2)`, letter = `'A' + index`. These are the same low bits as the static address the stack advertises today.
 
 **Tag identity line**, sent by streaming firmwares in the header each subscriber gets:
 `# id name=tagvaa honu_A addr=C5:3A:…:F1` (address most significant byte first).
@@ -92,7 +92,7 @@ palani maiko nohu hapuu ulaula makau ina piko
   `c++ -std=c++17 -I lib/tag_name lib/tag_name/tag_name.cpp test/host/tag_name_test.cpp -o .pio/tag_name_test`
 - [ ] **Step 3: Implement `lib/tag_name/tag_name.{h,cpp}`** with the word list and bit rules from "Fixed data".
 - [ ] **Step 4: Run the test**: same command, then `.pio/tag_name_test` → `all tag_name tests passed`.
-- [ ] **Step 5: Use it in the four BLE firmwares.** After `Bluefruit.begin(…)`, read `Bluefruit.getAddr(mac)`, build the name with prefix `tagvaa` (m3, m5_stroke, m5_acf) or `tagvaa log` (m4), pass it to `Bluefruit.setName`, and print `# name <name> addr <addr>` on USB serial at boot. Leave `setModel` strings as they are. In m4, m5_stroke and m5_acf add the `# id name=… addr=…` line to the header sent to each new subscriber, directly after the existing first header line.
+- [ ] **Step 5: Use it in the four BLE firmwares.** After `Bluefruit.begin(…)`, build the 6 id bytes from `NRF_FICR->DEVICEADDR` (helper `tag_factory_id(uint8_t id[6])` in a small Arduino-side header `lib/tag_name/tag_factory_id.h`, not compiled into the host test), build the name with prefix `tagvaa` (m3, m5_stroke, m5_acf) or `tagvaa log` (m4), pass it to `Bluefruit.setName`, and print `# name <name> addr <addr>` on USB serial at boot, where `addr` is what phones see (`Bluefruit.getAddr(mac)` formatted by `tag_addr_string`). Leave `setModel` strings as they are. In m4, m5_stroke and m5_acf add the `# id name=… addr=…` line to the header sent to each new subscriber, directly after the existing first header line.
 - [ ] **Step 6: Scripts.** `csc_check.py` accepts names starting with `tagvaa ` but not `tagvaa log`; `ble_log.py` accepts names starting with `tagvaa log` (keep the UART-service fallback).
 - [ ] **Step 7: Build everything**: `.venv/bin/pio run` → 7 environments `SUCCESS`; `strings firmware/m5_acf.uf2 | grep -c "# id name="` ≥ 1.
 - [ ] **Step 8: Docs.** README BLE names paragraph: names are `tagvaa <word>_<letter>` / `tagvaa log <word>_<letter>`, derived from the address, stable across reflashing; renamed 2026-11-2x, pair again. Quick start and site: "pick the `tagvaa …` sensor (e.g. `tagvaa honu_A`)".
