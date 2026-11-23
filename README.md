@@ -41,6 +41,14 @@ Project page: <https://leoniedu.github.io/tagvaa/>
 The other environments (`m1_hello`, `m2_accel`, `m3_csc`, `t_rail`) are
 bring-up tests; see the [development log](docs/devlog.md).
 
+## Where to buy
+
+The WisMesh Tag is sold by [RAK's own store](https://store.rakwireless.com) (about US$39) and by
+[RAK's official store on AliExpress](https://www.aliexpress.com/item/1005009754254701.html). Make sure you get the magnetic USB
+cable: it is the only way to charge and flash the Tag. The LoRa band doesn't
+matter for this firmware, but pick your region's band if you might go back to
+Meshtastic.
+
 ## Quick start
 
 1. Build (PlatformIO in a local virtual environment):
