@@ -119,6 +119,9 @@ p { margin: 0 0 1rem; max-width: var(--measure); }
 .figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 1.5rem 2rem; margin: 2rem 0; }
 .figure strong { display: block; font: 800 2.4rem/1 var(--display); color: var(--lagoon); font-variant-numeric: tabular-nums; }
 .figure span { display: block; color: var(--muted); font-size: 0.95rem; margin-top: 0.4rem; }
+.reasons { max-width: var(--measure); margin: 1.5rem 0 0; }
+.reasons dt { font-weight: 700; color: var(--deep); }
+.reasons dd { margin: 0.15rem 0 1.1rem; color: var(--muted); }
 .limits { padding-left: 1.2rem; max-width: var(--measure); }
 .limits li { margin-bottom: 0.5rem; }
 
@@ -191,6 +194,29 @@ footer p { margin-bottom: 0.6rem; }
       <p>Paddle Stroke is open firmware for the <a href="https://docs.rakwireless.com/product-categories/meshtastic/wismesh-tag/quickstart/">RAK WisMesh Tag</a>, a small Meshtastic tracker with an accelerometer and Bluetooth. Fix the Tag to the hull and it acts as a standard Bluetooth cycling cadence sensor. Each paddle stroke counts as one pedal turn, so a bike computer's cadence field shows your stroke rate.</p>
       <p><strong>It replaces Meshtastic entirely.</strong> While this firmware is on the Tag, it is no longer a tracker or a mesh node: the GPS is powered off, the LoRa radio is never used, and nothing is sent or received over the mesh. What's left is the accelerometer and Bluetooth. To get the tracker back, you flash stock Meshtastic again.</p>
       <p>It was built and tested with a COOSPO CS300 head unit, first in an OC1 and with an OC6 as the goal. Any device that pairs with a Bluetooth cadence sensor should work the same way.</p>
+    </div>
+  </section>
+
+  <section id="why-tag">
+    <div class="wrap">
+      <h2>Why the WisMesh Tag</h2>
+      <p>A stroke sensor needs an accelerometer, Bluetooth and a battery, in a box that survives spray and rain. The Tag already has all of that, ready-made.</p>
+      <dl class="reasons">
+        <dt>Sealed and flat</dt>
+        <dd>The case is rated IP66 and closed at the factory, and the Tag is thin enough to fix flat to the hull. Waterproofing is the hardest part of a homemade sensor.</dd>
+        <dt>Rechargeable</dt>
+        <dd>A 1000 mAh battery, far more than a session needs, charged through a magnetic USB cable. The same cable carries data for flashing.</dd>
+        <dt>Easy to flash and easy to undo</dt>
+        <dd>It uses the nRF52840 chip, the same one as common hobby boards, with drag-and-drop firmware updates. Flashing Meshtastic back turns it into a tracker again.</dd>
+        <dt>Cheap for what it is</dt>
+        <dd>Around €47 in Europe. A sealed DIY build costs about the same once you add a battery, charger and a good box. Some US shops ask much more.</dd>
+      </dl>
+      <h3>Trade-offs</h3>
+      <ul class="limits">
+        <li>You pay for GPS and LoRa hardware this firmware doesn't use.</li>
+        <li>The case can't be opened without breaking the seal, so the battery can't be replaced.</li>
+        <li>Charging and flashing need the magnetic cable, so keep a spare.</li>
+      </ul>
     </div>
   </section>
 
