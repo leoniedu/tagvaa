@@ -9,6 +9,14 @@ mesh node. The GPS is powered off, the LoRa radio is never used, and only the
 accelerometer and Bluetooth remain. Flash stock Meshtastic to get the tracker
 back (see [Reverting](#reverting-to-stock-meshtastic)).
 
+**Mounting.** The Tag is rated IP66: protected against rain, spray and strong
+water jets, but not rated for being underwater (that would be IP67). Preferably
+put it inside a sealed plastic junction box (IP67 or better; plastic so
+Bluetooth gets through). Fix the box rigidly to the boat and the Tag rigidly
+inside it, so the Tag still feels the boat's motion (see
+[docs/junction_box.md](docs/junction_box.md)). Otherwise, mount it where water
+runs off rather than pools, not where bilge water collects.
+
 BLE names: **Paddle Stroke** (cadence sensor, M3/M5) and **Paddle Logger**
 (raw data logger, M4). Renamed from "OC6 …" on 2026-11-17; a phone or CS300
 that paired earlier may still show the old name until it is forgotten.
