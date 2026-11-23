@@ -3,6 +3,8 @@
 .vscode/
 firmware/
 *.png
+# except app icons (asset catalogs need them in the repo for Xcode Cloud)
+!ios/**/*.appiconset/*.png
 data/
 
 # iOS
