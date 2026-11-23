@@ -28,7 +28,18 @@
   boot, probably a phone or the CS300 paired as "OC6 Stroke") can't lock
   out the recorder. Each subscriber gets its own header; USB serial logs
   `# BLE connected [n] <peer>` / `# streaming to [n]`.
-- Phone recording (verified 2026-11-17, iPhone): **Bluefruit Connect** →
+- Phone recording, first choice: the **tagvaa recorder app** (`ios/`, iPhone,
+  TestFlight). Pick the Tag, press Gravar, lock the phone; hold the stop
+  button 2 s to end. Every packet is written to the file as it arrives (no
+  export step), the link reconnects by itself, and a recording in progress
+  continues after the app is relaunched. The file has the same
+  `Timestamp,Mode,Data` layout as the Bluefruit export, plus `INFO` rows
+  (start date and time zone, link lost/restored, stop) and `GPS` rows (phone
+  position once a second); `read_accel()` takes the date and time zone from
+  the `INFO` start row. Share it from the Gravações tab, or copy it from the
+  Files app. Logic tests: `cd ios/RecorderCore && swift test`; reader test:
+  `Rscript test/r/test_read_accel.R`.
+- Phone recording, fallback (verified 2026-11-17, iPhone): **Bluefruit Connect** →
   connect (the phone may show the Tag's old Meshtastic name, e.g.
   `Name_xxxx`; if connecting fails, Settings → Bluetooth → Forget This
   Device) → UART → record → export as CSV/text. The export is

@@ -30,7 +30,13 @@ data_pattern <- "-?\\d+,-?\\d+,-?\\d+,-?\\d+,-?\\d+$"
 # the phone (seconds since local midnight) with the t_ms of the last complete
 # sample received so far.
 unpack_bluefruit <- function(path) {
-  packets <- read_csv(path, col_types = "ccc", trim_ws = FALSE) |>
+  rows <- read_csv(path, col_types = "ccc", trim_ws = FALSE)
+  # Rows written by the tagvaa recorder app (ios/) besides RX: INFO (start
+  # date and time zone, link drops) and GPS (phone position).
+  info <- rows |>
+    filter(Mode == "INFO") |>
+    transmute(phone_s = period_to_seconds(hms(Timestamp)), text = Data)
+  packets <- rows |>
     filter(Mode == "RX", !is.na(Data), Data != "") # a packet of just "\n" arrives empty
   data <- packets$Data
   is_complete <- \(x) str_detect(x, str_c("^", data_pattern)) | str_starts(x, "#") | x == "seq,t_ms,x_mg,y_mg,z_mg"
@@ -54,14 +60,19 @@ unpack_bluefruit <- function(path) {
   }
   lines <- str_c(sep, data, collapse = "") |> str_split_1("\n")
 
+  # t_ms of the last sample complete at each packet: the line rebuilt so far
+  # (Bluefruit strips the packet's newline) or, when the packet keeps its
+  # newline (recorder app), the last whole line inside it.
+  t_current <- str_match(current, "^-?\\d+,(-?\\d+),-?\\d+,-?\\d+,-?\\d+$")[, 2]
+  t_inside <- str_match(data, "(?:^|\n)-?\\d+,(-?\\d+),-?\\d+,-?\\d+,-?\\d+\n[^\n]*$")[, 2]
   clock <- tibble(
     phone_s = period_to_seconds(hms(packets$Timestamp)),
-    t_ms = str_match(current, "^-?\\d+,(-?\\d+),-?\\d+,-?\\d+,-?\\d+$")[, 2] |> as.numeric()
+    t_ms = coalesce(t_current, t_inside) |> as.numeric()
   ) |>
     filter(!is.na(t_ms), !is.na(phone_s)) |>
     distinct(t_ms, .keep_all = TRUE) |>
     mutate(phone_s = phone_s + 86400 * cumsum(c(0, diff(phone_s) < -43200))) # past midnight
-  list(lines = lines, clock = clock)
+  list(lines = lines, clock = clock, info = info)
 }
 
 # Wall-clock time for every sample: a straight-line fit of phone arrival
@@ -86,7 +97,7 @@ read_stream_lines <- function(path) {
   if (length(lines) > 0 && lines[[1]] == "Timestamp,Mode,Data") {
     return(unpack_bluefruit(path))
   }
-  list(lines = lines, clock = NULL)
+  list(lines = lines, clock = NULL, info = tibble(phone_s = numeric(), text = character()))
 }
 
 # Battery voltage lines ("# battery t_ms=... mv=...", once a minute).
@@ -98,10 +109,17 @@ read_battery <- function(path) {
     arrange(t_ms)
 }
 
-# date: day of the recording (the export only has times of day); defaults to
-# the file's modification date. tz: the phone's time zone.
-read_accel <- function(path, date = NULL, tz = Sys.timezone()) {
+# date: day of the recording (the export only has times of day). tz: the
+# phone's time zone. Both default to the recorder app's INFO start row, else
+# to the file's modification date and this machine's time zone.
+read_accel <- function(path, date = NULL, tz = NULL) {
   stream <- read_stream_lines(path)
+  start <- str_subset(stream$info$text, "^start ")
+  if (length(start) > 0) {
+    date <- date %||% str_match(start[[1]], "date=(\\S+)")[, 2]
+    tz <- tz %||% str_match(start[[1]], "tz=(\\S+)")[, 2]
+  }
+  tz <- tz %||% Sys.timezone()
   lines <- stream$lines
   clock <- stream$clock
   rows <- str_extract(lines, data_pattern)
