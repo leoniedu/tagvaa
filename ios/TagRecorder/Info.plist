@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDisplayName</key>
+    <string>tagvaa</string>
+    <!-- Hand-written plist: without this key App Store Connect rejects the upload
+         ("does not contain a bundle executable"), as learned in YachtVAA. -->
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleName</key>
+    <string>$(PRODUCT_NAME)</string>
+    <key>CFBundlePackageType</key>
+    <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <!-- No cryptography of its own: skips the per-build export-compliance question. -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>Para gravar os dados do Tag preso à canoa.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Para gravar a posição e a velocidade da canoa junto com os dados do Tag.</string>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>bluetooth-central</string>
+        <string>location</string>
+    </array>
+    <key>UILaunchScreen</key>
+    <dict/>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+    <key>UIFileSharingEnabled</key>
+    <true/>
+    <key>LSSupportsOpeningDocumentsInPlace</key>
+    <true/>
+</dict>
+</plist>

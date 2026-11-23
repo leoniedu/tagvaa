@@ -10,6 +10,10 @@ public struct ActiveSession: Codable, Equatable {
     public let tag: TagInfo
     public let fileURL: URL
     public let startedAt: Date
+
+    public init(tag: TagInfo, fileURL: URL, startedAt: Date) {
+        (self.tag, self.fileURL, self.startedAt) = (tag, fileURL, startedAt)
+    }
 }
 
 /// One recording: writes every packet as it arrives, survives link drops and
