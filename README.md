@@ -282,6 +282,13 @@ meaningful as a cadence.
   blanked a 6 s stretch of light strokes there). Rest shown in the simulated sea stays
   high: the simulated sea is more rhythmic than the water (the CS300 stayed at 0 during
   the real rests once blank).
+- Bench after the fix (2026-11-21, hand sliding to a click track, USB serial;
+  `experiments/bench/{protocol,capture}.pl`, compared with `experiments/bench/compare.R`;
+  data `data/bench_m5acf_v2_*`): device == replay (0.3 spm). 45/min steady 44–45; clean
+  stop blank in 2 s (old 3 s); 26/min shown 25–26 for the whole minute (old: blank);
+  32/min 31–32. Stop followed by hand wobbling blanked in 3 s (old kept 45 for 6 s), but
+  the wobble itself (~100/min) was then tracked by both: the bench cannot imitate sea
+  motion.
 - Replay on the Mac (same classes as the firmware, float):
   `c++ -std=c++17 -O2 -I lib/stroke lib/stroke/stroke_detector.cpp lib/stroke/acf_tracker.cpp test/host/acf_replay.cpp -o .pio/acf_replay`
   then `.pio/acf_replay [key=value ...] < data/session_window.csv` (args override `AcfParams`). Against the double-precision lab it
