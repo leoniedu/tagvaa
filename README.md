@@ -43,7 +43,7 @@ bring-up tests; see the [development log](docs/devlog.md).
 
 ## Where to buy
 
-The WisMesh Tag is sold by [RAK's own store](https://store.rakwireless.com) (about US$39) and by
+The WisMesh Tag is sold by [RAK's own store](https://store.rakwireless.com/products/wismesh-tag-meshtastic-gps-lora-tracker-ip66) (about US$39) and by
 [RAK's official store on AliExpress](https://www.aliexpress.com/item/1005009754254701.html). Make sure you get the magnetic USB
 cable: it is the only way to charge and flash the Tag. The LoRa band doesn't
 matter for this firmware, but pick your region's band if you might go back to
