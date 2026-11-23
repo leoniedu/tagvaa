@@ -12,6 +12,11 @@
 #include <bluefruit.h>
 #include <dfu_escape.h>
 #include <lis2dh.h>
+#include <tag_factory_id.h>
+
+static char tagName[32];
+static char tagAddr[24];
+
 
 constexpr uint32_t SAMPLE_PERIOD_MS = 10; // 100 Hz
 constexpr uint32_t POLL_MS = 50;
@@ -100,7 +105,7 @@ void setup()
 
     Bluefruit.configPrphBandwidth(BANDWIDTH_MAX); // MTU up to 247; must precede begin()
     Bluefruit.begin(MAX_CONNECTIONS, 0);
-    Bluefruit.setName("tagvaa log");
+    tag_apply_name("tagvaa log", tagName, sizeof tagName, tagAddr, sizeof tagAddr);
     Bluefruit.setTxPower(4);
     Bluefruit.autoConnLed(true);
     Bluefruit.Periph.setConnectCallback(onConnect);
@@ -120,7 +125,7 @@ void setup()
     Bluefruit.Advertising.setFastTimeout(30);
     Bluefruit.Advertising.start(0);
 
-    Serial.println("# advertising as \"tagvaa log\"");
+    Serial.printf("# advertising as \"%s\"\n# name %s addr %s\n", tagName, tagName, tagAddr);
     Serial.println("seq,t_ms,x_mg,y_mg,z_mg");
 }
 
@@ -131,9 +136,9 @@ void loop()
         bool want = Bluefruit.connected(h) && bleuart.notifyEnabled(h);
         if (want && !streaming[h]) {
             streaming[h] = true;
-            char hdr[160];
-            snprintf(hdr, sizeof hdr, "# tagvaa log, 100 Hz, +-4 g, uptime %lu ms\n# battery t_ms=%lu mv=%u\nseq,t_ms,x_mg,y_mg,z_mg\n",
-                     (unsigned long)millis(), (unsigned long)millis(), batteryMillivolts());
+            char hdr[224];
+            snprintf(hdr, sizeof hdr, "# tagvaa log, 100 Hz, +-4 g, uptime %lu ms\n# id name=%s addr=%s\n# battery t_ms=%lu mv=%u\nseq,t_ms,x_mg,y_mg,z_mg\n",
+                     (unsigned long)millis(), tagName, tagAddr, (unsigned long)millis(), batteryMillivolts());
             bleuart.write(h, (const uint8_t *)hdr, strlen(hdr));
             Serial.printf("# streaming to [%u]\n", h);
         } else if (!want) {

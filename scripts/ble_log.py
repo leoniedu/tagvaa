@@ -21,7 +21,7 @@ async def main(path, seconds):
     # Match the advertised name or the UART service: macOS may show a cached
     # older name for the Tag.
     dev = await BleakScanner.find_device_by_filter(
-        lambda d, adv: adv.local_name == "tagvaa log" or NUS_SERVICE in adv.service_uuids, timeout=15
+        lambda d, adv: (adv.local_name or "").startswith("tagvaa log") or NUS_SERVICE in adv.service_uuids, timeout=15
     )
     if dev is None:
         sys.exit("tagvaa log not found")

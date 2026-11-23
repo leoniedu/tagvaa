@@ -15,6 +15,11 @@
 #include <dfu_escape.h>
 #include <lis2dh.h>
 #include <stroke_detector.h>
+#include <tag_factory_id.h>
+
+static char tagName[32];
+static char tagAddr[24];
+
 
 constexpr uint16_t APPEARANCE_CADENCE_SENSOR = 0x0483;
 constexpr uint8_t CSC_FLAG_CRANK_DATA = 0x02;
@@ -166,7 +171,7 @@ void setupBle()
 {
     Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
     Bluefruit.begin(MAX_CONNECTIONS, 0);
-    Bluefruit.setName("tagvaa");
+    tag_apply_name("tagvaa", tagName, sizeof tagName, tagAddr, sizeof tagAddr);
     Bluefruit.setAppearance(APPEARANCE_CADENCE_SENSOR);
     Bluefruit.setTxPower(4);
     Bluefruit.autoConnLed(false); // blue LED off (power)
@@ -229,7 +234,7 @@ void setup()
     }
     accel.configure(LIS2DH::ODR_100HZ, true);
     setupBle();
-    Serial.println("# advertising as \"tagvaa\"");
+    Serial.printf("# advertising as \"%s\"\n# name %s addr %s\n", tagName, tagName, tagAddr);
 }
 
 void loop()
@@ -241,10 +246,10 @@ void loop()
         bool want = Bluefruit.connected(h) && bleuart.notifyEnabled(h);
         if (want && !streaming[h]) {
             streaming[h] = true;
-            char hdr[160];
+            char hdr[224];
             snprintf(hdr, sizeof hdr,
-                     "# tagvaa, 100 Hz, +-4 g, uptime %lu ms\n# battery t_ms=%lu mv=%u\nseq,t_ms,x_mg,y_mg,z_mg\n",
-                     (unsigned long)now, (unsigned long)now, batteryMillivolts());
+                     "# tagvaa, 100 Hz, +-4 g, uptime %lu ms\n# id name=%s addr=%s\n# battery t_ms=%lu mv=%u\nseq,t_ms,x_mg,y_mg,z_mg\n",
+                     (unsigned long)now, tagName, tagAddr, (unsigned long)now, batteryMillivolts());
             bleuart.write(h, (const uint8_t *)hdr, strlen(hdr));
         } else if (!want) {
             streaming[h] = false;

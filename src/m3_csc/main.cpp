@@ -4,6 +4,11 @@
 #include <Arduino.h>
 #include <bluefruit.h>
 #include <dfu_escape.h>
+#include <tag_factory_id.h>
+
+static char tagName[32];
+static char tagAddr[24];
+
 
 constexpr uint16_t APPEARANCE_CADENCE_SENSOR = 0x0483;
 constexpr uint8_t CSC_FLAG_CRANK_DATA = 0x02;
@@ -80,7 +85,7 @@ void setup()
     Serial.println("tagvaa: milestone 3 (CSC, fixed 60 rpm)");
 
     Bluefruit.begin();
-    Bluefruit.setName("tagvaa");
+    tag_apply_name("tagvaa", tagName, sizeof tagName, tagAddr, sizeof tagAddr);
     Bluefruit.setAppearance(APPEARANCE_CADENCE_SENSOR);
     Bluefruit.setTxPower(4); // dBm; max for nRF52840 is 8
     Bluefruit.autoConnLed(true); // blue LED blinks while advertising, solid when connected
@@ -96,7 +101,7 @@ void setup()
 
     setupCsc();
     startAdvertising();
-    Serial.println("advertising as \"tagvaa\"");
+    Serial.printf("advertising as \"%s\"\n# name %s addr %s\n", tagName, tagName, tagAddr);
 }
 
 void loop()

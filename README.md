@@ -17,10 +17,14 @@ inside it, so the Tag still feels the boat's motion (see
 [docs/junction_box.md](docs/junction_box.md)). Otherwise, mount it where water
 runs off rather than pools, not where bilge water collects.
 
-BLE names: **tagvaa** (cadence sensor, M3/M5) and **tagvaa log** (raw data
-logger, M4). Renamed from "Paddle Stroke" / "Paddle Logger" on 2026-11-23 and
-from "OC6 …" on 2026-11-17; a phone or CS300 that paired earlier may still
-show an old name until it is forgotten.
+BLE names: **tagvaa honu_A** (cadence sensor, M3/M5) and **tagvaa log honu_A**
+(raw data logger, M4), where `honu_A` is an ocean word and a letter derived from
+the chip's factory address (`lib/tag_name`). Each Tag always gets the same name,
+whatever it is flashed with, and two Tags almost never share one; the USB
+serial log and the stream header (`# id name=… addr=…`) show it. Renamed from
+plain "tagvaa" / "tagvaa log" and from "Paddle Stroke" / "Paddle Logger" on
+2026-11-23, and from "OC6 …" on 2026-11-17; a phone or CS300 that paired
+earlier may still show an old name until it is forgotten and paired again.
 
 > **Warning — use at your own risk.** This is experimental firmware for a
 > device it was not made for. Flashing it can leave your Tag unusable
@@ -75,7 +79,7 @@ Meshtastic.
 3. Open `INFO_UF2.TXT`: the SoftDevice must be **S140 6.1.x** (if 7.x, stop).
    Copy `CURRENT.UF2` somewhere safe as a full backup.
 4. Copy `firmware/m5_acf.uf2` onto the drive; the Tag reboots by itself.
-5. On the head unit, add a cadence sensor and pick **tagvaa**.
+5. On the head unit, add a cadence sensor and pick the **tagvaa …** sensor (e.g. `tagvaa honu_A`).
 
 Details and edge cases: [docs/flashing.md](docs/flashing.md).
 

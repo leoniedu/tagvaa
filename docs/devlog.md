@@ -154,7 +154,8 @@ Settings: ±4 g, high-resolution 12-bit (2 mg/digit), block data update.
 
 ### 3 — BLE cadence sensor, fixed 60 rpm (`m3_csc.uf2`)
 
-- Advertises as **tagvaa**, appearance 0x0483 (cadence sensor),
+- Advertises as **tagvaa honu_A** (name from the factory address since
+  2026-11-23, see `lib/tag_name`), appearance 0x0483 (cadence sensor),
   service 0x1816.
 - CSC Measurement 0x2A5B (notify): `02 RR RR TT TT` — flags 0x02, uint16
   crank revolutions, uint16 last event time (1/1024 s), little-endian.

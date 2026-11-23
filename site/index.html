@@ -233,7 +233,7 @@ footer p { margin-bottom: 0.6rem; }
         <li><h3>Find the surge</h3><p>Gravity is removed and the Tag works out which horizontal direction the boat surges along, however it is mounted.</p></li>
         <li><h3>Keep the paddling band</h3><p>A 0.5–2 Hz band-pass filter keeps the rhythm of strokes and drops slow swell and fast vibration.</p></li>
         <li><h3>Track the rhythm</h3><p>A running autocorrelation picks the stroke period five times a second. Rates outside 24–110 per minute are not shown, so the display goes blank instead of guessing.</p></li>
-        <li><h3>Send it as cadence</h3><p>The Tag advertises as “tagvaa” using the standard Cycling Speed and Cadence profile, and the head unit shows strokes per minute.</p></li>
+        <li><h3>Send it as cadence</h3><p>The Tag advertises under its own name, such as “tagvaa honu_A”, using the standard Cycling Speed and Cadence profile, and the head unit shows strokes per minute.</p></li>
       </ol>
     </div>
   </section>
@@ -300,7 +300,7 @@ python3 -m venv .venv
           <strong>Flash.</strong> Copy <code>firmware/m5_acf.uf2</code> onto the drive. The Tag reboots into the new firmware by itself.
         </li>
         <li>
-          <strong>Pair.</strong> On your head unit, add a cadence sensor and pick “tagvaa”. The green LED blinks once per stroke.
+          <strong>Pair.</strong> On your head unit, add a cadence sensor and pick your Tag’s “tagvaa …” name (for example “tagvaa honu_A”). The green LED blinks once per stroke.
         </li>
         <li id="mount">
           <strong>Mount.</strong> Preferably put the Tag inside a sealed plastic junction box (IP67 or better; plastic so Bluetooth gets through). Fix the box rigidly to the boat and the Tag rigidly inside it, so the Tag still feels the boat's motion. Without a box, mount it where water runs off rather than pools, not where bilge water collects.

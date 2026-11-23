@@ -18,7 +18,8 @@ async def main():
     dev, adv = None, None
     found = await BleakScanner.discover(timeout=10, return_adv=True)
     for d, a in found.values():
-        if a.local_name == "tagvaa":
+        name = a.local_name or ""
+        if name.startswith("tagvaa ") and not name.startswith("tagvaa log"):
             dev, adv = d, a
     if dev is None:
         print("tagvaa not found")
