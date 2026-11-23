@@ -1,4 +1,4 @@
-# Read a Paddle Logger CSV (milestone 4) and plot x/y/z and the magnitude.
+# Read a tagvaa log CSV (milestone 4) and plot x/y/z and the magnitude.
 #
 # Usage:
 #   Rscript analysis/read_accel.R path/to/session.csv [output.png]

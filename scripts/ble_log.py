@@ -1,4 +1,4 @@
-"""Record the Paddle Logger BLE UART stream from the Mac.
+"""Record the tagvaa log BLE UART stream from the Mac.
 
 Writes the same "Timestamp,Mode,Data" CSV as Bluefruit Connect's UART export
 (local time of day per BLE packet), so analysis/read_accel.R handles both.
@@ -21,10 +21,10 @@ async def main(path, seconds):
     # Match the advertised name or the UART service: macOS may show a cached
     # older name for the Tag.
     dev = await BleakScanner.find_device_by_filter(
-        lambda d, adv: adv.local_name == "Paddle Logger" or NUS_SERVICE in adv.service_uuids, timeout=15
+        lambda d, adv: adv.local_name == "tagvaa log" or NUS_SERVICE in adv.service_uuids, timeout=15
     )
     if dev is None:
-        sys.exit("Paddle Logger not found")
+        sys.exit("tagvaa log not found")
     print(f"found {dev.name} ({dev.address})")
     with open(path, "w", newline="") as f:
         out = csv.writer(f, quoting=csv.QUOTE_MINIMAL)

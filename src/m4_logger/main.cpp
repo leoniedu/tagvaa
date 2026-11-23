@@ -84,7 +84,7 @@ void setup()
     while (!Serial && millis() < 2000) {
         delay(10);
     }
-    Serial.println("# Paddle Logger: milestone 4 (100 Hz logger)");
+    Serial.println("# tagvaa log: milestone 4 (100 Hz logger)");
 
     delay(50);
     Wire.begin();
@@ -100,14 +100,14 @@ void setup()
 
     Bluefruit.configPrphBandwidth(BANDWIDTH_MAX); // MTU up to 247; must precede begin()
     Bluefruit.begin(MAX_CONNECTIONS, 0);
-    Bluefruit.setName("Paddle Logger");
+    Bluefruit.setName("tagvaa log");
     Bluefruit.setTxPower(4);
     Bluefruit.autoConnLed(true);
     Bluefruit.Periph.setConnectCallback(onConnect);
     Bluefruit.Periph.setDisconnectCallback(onDisconnect);
 
     deviceInfo.setManufacturer("DIY");
-    deviceInfo.setModel("Paddle Logger (WisMesh Tag)");
+    deviceInfo.setModel("tagvaa log (WisMesh Tag)");
     deviceInfo.begin();
     bleuart.begin();
 
@@ -120,7 +120,7 @@ void setup()
     Bluefruit.Advertising.setFastTimeout(30);
     Bluefruit.Advertising.start(0);
 
-    Serial.println("# advertising as \"Paddle Logger\"");
+    Serial.println("# advertising as \"tagvaa log\"");
     Serial.println("seq,t_ms,x_mg,y_mg,z_mg");
 }
 
@@ -132,7 +132,7 @@ void loop()
         if (want && !streaming[h]) {
             streaming[h] = true;
             char hdr[160];
-            snprintf(hdr, sizeof hdr, "# Paddle Logger, 100 Hz, +-4 g, uptime %lu ms\n# battery t_ms=%lu mv=%u\nseq,t_ms,x_mg,y_mg,z_mg\n",
+            snprintf(hdr, sizeof hdr, "# tagvaa log, 100 Hz, +-4 g, uptime %lu ms\n# battery t_ms=%lu mv=%u\nseq,t_ms,x_mg,y_mg,z_mg\n",
                      (unsigned long)millis(), (unsigned long)millis(), batteryMillivolts());
             bleuart.write(h, (const uint8_t *)hdr, strlen(hdr));
             Serial.printf("# streaming to [%u]\n", h);

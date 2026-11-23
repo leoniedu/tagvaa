@@ -29,7 +29,7 @@ void setup()
     while (!Serial && millis() < 5000) {
         delay(10);
     }
-    Serial.println("Paddle Stroke: milestone 2 (accelerometer)");
+    Serial.println("tagvaa: milestone 2 (accelerometer)");
 
     delay(50); // let the 3.3 V rail (enabled in initVariant) settle
     Wire.begin();

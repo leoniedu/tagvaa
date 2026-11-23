@@ -1,4 +1,4 @@
-"""Scan for "Paddle Stroke", read CSC Feature, print CSC Measurement notifications with computed rpm.
+"""Scan for "tagvaa", read CSC Feature, print CSC Measurement notifications with computed rpm.
 
 Usage: .venv/bin/python scripts/csc_check.py [notifications=5]
 """
@@ -18,10 +18,10 @@ async def main():
     dev, adv = None, None
     found = await BleakScanner.discover(timeout=10, return_adv=True)
     for d, a in found.values():
-        if a.local_name == "Paddle Stroke":
+        if a.local_name == "tagvaa":
             dev, adv = d, a
     if dev is None:
-        print("Paddle Stroke not found")
+        print("tagvaa not found")
         return
     print(f"found {adv.local_name} rssi {adv.rssi} dBm, advertised services {adv.service_uuids}")
 

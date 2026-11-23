@@ -2,7 +2,7 @@
 
 ## 100 Hz logger (`m4_logger.uf2`)
 
-- Advertises as **Paddle Logger** with the Nordic UART Service.
+- Advertises as **tagvaa log** with the Nordic UART Service.
 - LIS2DH at 100 Hz, ±4 g, FIFO in stream mode; the MCU drains it every 50 ms.
 - **Resolution: 8 mg steps.** HR mode is enabled, but the LIS2DH FIFO only
   keeps 10 bits per axis (measured: every value a multiple of 8 mg, vs 2 mg
@@ -12,7 +12,7 @@
   Output, also mirrored to USB serial:
 
   ```
-  # Paddle Logger, 100 Hz, +-4 g, uptime 12345 ms
+  # tagvaa log, 100 Hz, +-4 g, uptime 12345 ms
   seq,t_ms,x_mg,y_mg,z_mg
   0,12350,-12,8,1004
   ```
@@ -95,7 +95,7 @@ it: at 5.9 km/h → 2.4 m (42) or 1.2 m (85); at 8.7 km/h → 3.4 m or 1.7 m.
 the Tag comparison's median ratio est/ref (≈1 or ≈2) will decide. A manual
 count of strokes over 30 s while paddling also settles it.
 
-Note for M5: Paddle Stroke must also report **strokes**/min, so each detected
+Note for M5: tagvaa must also report **strokes**/min, so each detected
 stroke adds one crank revolution (85 strokes/min shows as 85 rpm). If the
 CS300 should match the watch's cycle count instead, add one revolution per
 two strokes.

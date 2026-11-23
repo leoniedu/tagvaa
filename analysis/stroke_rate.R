@@ -1,4 +1,4 @@
-# Estimate paddle stroke rate from a Paddle Logger recording and compare it
+# Estimate paddle stroke rate from a tagvaa log recording and compare it
 # with the cadence recorded by a watch / bike computer.
 #
 # Usage:

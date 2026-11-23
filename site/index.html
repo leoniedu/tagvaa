@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Paddle Stroke: stroke rate for outrigger canoes</title>
+<title>tagvaa: stroke rate for outrigger canoes</title>
 <meta name="description" content="Open firmware that turns a RAK WisMesh Tag into a Bluetooth stroke-rate sensor for outrigger canoes. Any head unit that reads cycling cadence shows strokes per minute.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -173,7 +173,7 @@ footer p { margin-bottom: 0.6rem; }
 
 <header class="hero">
   <div class="wrap">
-    <h1>Paddle Stroke</h1>
+    <h1>tagvaa</h1>
     <p class="lede">Strokes per minute for outrigger canoes, measured by a small tag fixed to the boat and shown on the bike computer you already own.</p>
     <div class="actions">
       <a class="button" href="#get-started">Get started</a>
@@ -193,7 +193,7 @@ footer p { margin-bottom: 0.6rem; }
   <section id="what">
     <div class="wrap">
       <h2>What it is</h2>
-      <p>Paddle Stroke is open firmware for the <a href="https://docs.rakwireless.com/product-categories/meshtastic/wismesh-tag/quickstart/">RAK WisMesh Tag</a>, a small Meshtastic tracker with an accelerometer and Bluetooth. Fix the Tag firmly to the boat and it acts as a standard Bluetooth cycling cadence sensor. Each paddle stroke counts as one pedal turn, so a bike computer's cadence field shows your stroke rate.</p>
+      <p>tagvaa is open firmware for the <a href="https://docs.rakwireless.com/product-categories/meshtastic/wismesh-tag/quickstart/">RAK WisMesh Tag</a>, a small Meshtastic tracker with an accelerometer and Bluetooth. Fix the Tag firmly to the boat and it acts as a standard Bluetooth cycling cadence sensor. Each paddle stroke counts as one pedal turn, so a bike computer's cadence field shows your stroke rate.</p>
       <p><strong>It replaces Meshtastic entirely.</strong> While this firmware is on the Tag, it is no longer a tracker or a mesh node: the GPS is powered off, the LoRa radio is never used, and nothing is sent or received over the mesh. What's left is the accelerometer and Bluetooth. To get the tracker back, you flash stock Meshtastic again.</p>
       <p>It was built and tested with a COOSPO CS300 head unit, first in an OC1 and with an OC6 as the goal. Any device that pairs with a Bluetooth cadence sensor should work the same way.</p>
       <p><strong>Status: experimental.</strong> The current firmware (<code>m5_acf</code>) works on the bench and is being tested on the water. Power saving isn't done yet. One idea for later is to run the stroke detector inside Meshtastic, so the Tag stays a tracker and mesh node while it reports stroke rate (<a href="https://github.com/leoniedu/tagvaa/blob/main/docs/devlog.md#possible-future-a-meshtastic-module">trade-offs</a>).</p>
@@ -233,7 +233,7 @@ footer p { margin-bottom: 0.6rem; }
         <li><h3>Find the surge</h3><p>Gravity is removed and the Tag works out which horizontal direction the boat surges along, however it is mounted.</p></li>
         <li><h3>Keep the paddling band</h3><p>A 0.5–2 Hz band-pass filter keeps the rhythm of strokes and drops slow swell and fast vibration.</p></li>
         <li><h3>Track the rhythm</h3><p>A running autocorrelation picks the stroke period five times a second. Rates outside 24–110 per minute are not shown, so the display goes blank instead of guessing.</p></li>
-        <li><h3>Send it as cadence</h3><p>The Tag advertises as “Paddle Stroke” using the standard Cycling Speed and Cadence profile, and the head unit shows strokes per minute.</p></li>
+        <li><h3>Send it as cadence</h3><p>The Tag advertises as “tagvaa” using the standard Cycling Speed and Cadence profile, and the head unit shows strokes per minute.</p></li>
       </ol>
     </div>
   </section>
@@ -260,13 +260,13 @@ footer p { margin-bottom: 0.6rem; }
   <section id="alternatives">
     <div class="wrap">
       <h2>Ready-made alternatives</h2>
-      <p>If you want something finished, waterproof and supported, buy one of these instead. Paddle Stroke is the cheap, do-it-yourself route: you flash the firmware yourself and use a bike computer you may already have.</p>
+      <p>If you want something finished, waterproof and supported, buy one of these instead. tagvaa is the cheap, do-it-yourself route: you flash the firmware yourself and use a bike computer you may already have.</p>
       <table class="compare">
         <thead><tr><th scope="col">Option</th><th scope="col">What it is</th><th scope="col">About</th></tr></thead>
         <tbody>
           <tr><th scope="row"><a href="https://westcoastpaddlesports.com/products/speedcoach-oc">NK SpeedCoach OC&nbsp;2</a></th><td>A stroke-rate and speed display made for outrigger canoes, with GPS and distance per stroke.</td><td class="price">US$470</td></tr>
           <tr><th scope="row"><a href="https://threeoceans.co/products/vaaka-cadence-sensor">Vaaka Cadence</a></th><td>A waterproof sensor on the paddle that sends stroke rate over Bluetooth and ANT+ to a watch or bike computer.</td><td class="price">US$225</td></tr>
-          <tr><th scope="row">Paddle Stroke</th><td>Experimental firmware for a WisMesh Tag fixed to the boat; any Bluetooth head unit shows the rate.</td><td class="price">US$39 + head unit</td></tr>
+          <tr><th scope="row">tagvaa</th><td>Experimental firmware for a WisMesh Tag fixed to the boat; any Bluetooth head unit shows the rate.</td><td class="price">US$39 + head unit</td></tr>
         </tbody>
       </table>
       <p>Prices are from one retailer each and will vary.</p>
@@ -300,7 +300,7 @@ python3 -m venv .venv
           <strong>Flash.</strong> Copy <code>firmware/m5_acf.uf2</code> onto the drive. The Tag reboots into the new firmware by itself.
         </li>
         <li>
-          <strong>Pair.</strong> On your head unit, add a cadence sensor and pick “Paddle Stroke”. The green LED blinks once per stroke.
+          <strong>Pair.</strong> On your head unit, add a cadence sensor and pick “tagvaa”. The green LED blinks once per stroke.
         </li>
         <li id="mount">
           <strong>Mount.</strong> Preferably put the Tag inside a sealed plastic junction box (IP67 or better; plastic so Bluetooth gets through). Fix the box rigidly to the boat and the Tag rigidly inside it, so the Tag still feels the boat's motion. Without a box, mount it where water runs off rather than pools, not where bilge water collects.

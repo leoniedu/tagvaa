@@ -166,7 +166,7 @@ void setupBle()
 {
     Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
     Bluefruit.begin(MAX_CONNECTIONS, 0);
-    Bluefruit.setName("Paddle Stroke");
+    Bluefruit.setName("tagvaa");
     Bluefruit.setAppearance(APPEARANCE_CADENCE_SENSOR);
     Bluefruit.setTxPower(4);
     Bluefruit.autoConnLed(false); // blue LED off (power)
@@ -174,7 +174,7 @@ void setupBle()
     Bluefruit.Periph.setDisconnectCallback(onDisconnect);
 
     deviceInfo.setManufacturer("DIY");
-    deviceInfo.setModel("Paddle Stroke (WisMesh Tag)");
+    deviceInfo.setModel("tagvaa (WisMesh Tag)");
     deviceInfo.begin();
     battery.begin();
     battery.write(batteryPercent(batteryMillivolts()));
@@ -216,7 +216,7 @@ void setup()
 
     Serial.begin(115200);
     while (!Serial && millis() < 2000) delay(10);
-    Serial.println("# Paddle Stroke: milestone 5 (stroke detector + cadence)");
+    Serial.println("# tagvaa: milestone 5 (stroke detector + cadence)");
 
     Wire.begin();
     Wire.setClock(400000);
@@ -229,7 +229,7 @@ void setup()
     }
     accel.configure(LIS2DH::ODR_100HZ, true);
     setupBle();
-    Serial.println("# advertising as \"Paddle Stroke\"");
+    Serial.println("# advertising as \"tagvaa\"");
 }
 
 void loop()
@@ -243,7 +243,7 @@ void loop()
             streaming[h] = true;
             char hdr[160];
             snprintf(hdr, sizeof hdr,
-                     "# Paddle Stroke, 100 Hz, +-4 g, uptime %lu ms\n# battery t_ms=%lu mv=%u\nseq,t_ms,x_mg,y_mg,z_mg\n",
+                     "# tagvaa, 100 Hz, +-4 g, uptime %lu ms\n# battery t_ms=%lu mv=%u\nseq,t_ms,x_mg,y_mg,z_mg\n",
                      (unsigned long)now, (unsigned long)now, batteryMillivolts());
             bleuart.write(h, (const uint8_t *)hdr, strlen(hdr));
         } else if (!want) {

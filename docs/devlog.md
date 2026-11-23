@@ -52,7 +52,7 @@ wrong along the way. Hardware notes and the rail test are in
   stroke's peak, 1/1024 s); CSC Measurement notified every second, so the
   head unit shows strokes/min and drops to 0 when paddling stops. A stroke
   is confirmed ~0.6–0.9 s after its peak.
-- Advertises as **Paddle Stroke** (CSC service + appearance; Nordic UART in
+- Advertises as **tagvaa** (CSC service + appearance; Nordic UART in
   the scan response); two connections (head unit + phone). The UART carries
   the raw 100 Hz stream as in M4 plus `# stroke n=… seq=… t_ms=…` and
   `# battery` lines, so a phone can record for validation while the CS300
@@ -137,7 +137,7 @@ meaningful as a cadence.
 
 ### 1 — Hello world (`m1_hello.uf2`)
 
-Expect `Paddle Stroke: hello from the WisMesh Tag`, then `tick N  uptime … ms`
+Expect `tagvaa: hello from the WisMesh Tag`, then `tick N  uptime … ms`
 once per second; green and blue LEDs alternate every second.
 Confirms toolchain, UF2 layout, USB serial and LED pins.
 
@@ -154,7 +154,7 @@ Settings: ±4 g, high-resolution 12-bit (2 mg/digit), block data update.
 
 ### 3 — BLE cadence sensor, fixed 60 rpm (`m3_csc.uf2`)
 
-- Advertises as **Paddle Stroke**, appearance 0x0483 (cadence sensor),
+- Advertises as **tagvaa**, appearance 0x0483 (cadence sensor),
   service 0x1816.
 - CSC Measurement 0x2A5B (notify): `02 RR RR TT TT` — flags 0x02, uint16
   crank revolutions, uint16 last event time (1/1024 s), little-endian.
@@ -167,11 +167,11 @@ Settings: ±4 g, high-resolution 12-bit (2 mg/digit), block data update.
 Mac check (Python `bleak` in `.venv`): `.venv/bin/python scripts/csc_check.py`
 scans, reads CSC Feature and decodes 5 notifications into rpm.
 
-Test with nRF Connect (iPhone): scan → Paddle Stroke shows the CSC service
+Test with nRF Connect (iPhone): scan → tagvaa shows the CSC service
 in the advertisement → connect → Cycling Speed and Cadence → enable
 notifications on CSC Measurement: a 5-byte value every second, revs and
 time increasing (time by 0x0400). Read CSC Feature = `0x0002`. Disconnect,
-then on the CS300 add a cadence sensor: it should find "Paddle Stroke" and show
+then on the CS300 add a cadence sensor: it should find "tagvaa" and show
 **60 rpm**.
 
 ### 4 — 100 Hz logger (`m4_logger.uf2`)
