@@ -1,6 +1,6 @@
 # Tag recorder app — design (short)
 
-Status: proposed 2026-11-23, awaiting approval.
+Status: approved 2026-11-23.
 
 ## Why
 
@@ -108,8 +108,12 @@ Export. The recorder exists to make losing a session hard.
     rename every Tag.
 - The name is the hull's identity in the data. Head units and phones paired
   with plain `tagvaa` must pair again.
-- Later upgrade, not in this job: set the canoe's real name from the app and
-  store it on the Tag.
+- The name is computed at every boot from the factory address; nothing is
+  stored, so reflashing never changes it.
+- Follow-up, not in this job: a user-set name (e.g. the canoe's) stored in the
+  Tag's file area, set first by a USB serial command (`name kaimana`), later
+  by a Rename button in the app; falls back to the derived name if the store
+  is wiped. The data identity stays the factory address.
 
 **Where**
 - App in `ios/` in the tagvaa repo, XcodeGen `project.yml`, iOS 17,
