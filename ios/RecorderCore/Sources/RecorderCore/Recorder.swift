@@ -14,6 +14,23 @@ public struct ActiveSession: Codable, Equatable {
     public init(tag: TagInfo, fileURL: URL, startedAt: Date) {
         (self.tag, self.fileURL, self.startedAt) = (tag, fileURL, startedAt)
     }
+
+    /// Longest session a relaunch may continue. Longer than any outing
+    /// (a race ran 158 min); a session older than this was cut short by a
+    /// dead phone and must not swallow a later one.
+    public static let maxResumeAge: TimeInterval = 6 * 3600
+
+    public func isResumable(now: Date) -> Bool {
+        let age = now.timeIntervalSince(startedAt)
+        return age >= 0 && age <= Self.maxResumeAge
+    }
+
+    /// Whether `url` is this session's file, however its directory was
+    /// spelled (listings give /private/var for /var). All recordings live in
+    /// one folder and names carry the start time, so the name decides.
+    public func refersTo(_ url: URL) -> Bool {
+        url.lastPathComponent == fileURL.lastPathComponent
+    }
 }
 
 /// One recording: writes every packet as it arrives, survives link drops and
@@ -124,10 +141,14 @@ public final class Recorder: TagLinkDelegate {
     }
 
     public func linkDropped() {
-        guard state == .recording || state == .connecting else { return }
-        writeInfo("link-lost")
         guard isOpen, let tag = activeSession?.tag else { return }
-        state = .reconnecting
+        if state != .reconnecting {
+            writeInfo("link-lost")
+            guard isOpen else { return }
+            state = .reconnecting
+        }
+        // Also when a reconnect attempt itself failed: CoreBluetooth does not
+        // retry on its own, and giving up would end the recording silently.
         link.connect(peripheralID: tag.peripheralID)
     }
 

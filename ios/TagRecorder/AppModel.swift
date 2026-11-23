@@ -32,8 +32,12 @@ final class AppModel: ObservableObject {
         recorder.onChange = { [weak self] in self?.recorderChanged() }
         gps.onFix = { [weak self] fix in self?.recorder.add(fix) }
         if let session = store.activeSession {
-            recorder.resume(tag: session.tag, fileURL: session.fileURL, startedAt: session.startedAt)
-            gps.start()
+            if session.isResumable(now: Date()) {
+                recorder.resume(tag: session.tag, fileURL: session.fileURL, startedAt: session.startedAt)
+                gps.start()
+            } else {
+                store.activeSession = nil   // cut short long ago (dead phone): never append to it
+            }
         }
         refreshRecordings()
     }
@@ -74,7 +78,7 @@ final class AppModel: ObservableObject {
     }
 
     func delete(_ url: URL) {
-        guard url != recorder.activeSession?.fileURL else { return }
+        if let session = recorder.activeSession, session.refersTo(url) { return }
         try? FileManager.default.removeItem(at: url)
         refreshRecordings()
     }

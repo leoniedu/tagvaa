@@ -121,4 +121,29 @@ final class RecorderTests: XCTestCase {
         guard case .failed = r.state else { return XCTFail("expected failed, got \(r.state)") }
         XCTAssertTrue(link.connects.isEmpty)
     }
+
+    func testSecondDropWhileReconnectingRetries() {
+        let r = makeRecorder()
+        r.start(tag: tag)
+        r.linkConnected()
+        r.linkDropped()
+        r.linkDropped()   // the reconnect attempt itself failed
+        XCTAssertEqual(r.state, .reconnecting)
+        XCTAssertEqual(link.connects.count, 3)
+        XCTAssertEqual(rows(r).filter { $0[2] == "link-lost" }.count, 1)
+    }
+
+    func testSessionRecognisesItsFileThroughSymlinks() {
+        let session = ActiveSession(tag: tag, fileURL: URL(fileURLWithPath: "/var/mobile/Documents/a.csv"),
+                                    startedAt: clock)
+        XCTAssertTrue(session.refersTo(URL(fileURLWithPath: "/private/var/mobile/Documents/a.csv")))
+        XCTAssertFalse(session.refersTo(URL(fileURLWithPath: "/private/var/mobile/Documents/b.csv")))
+    }
+
+    func testOnlyRecentSessionsResume() {
+        let session = ActiveSession(tag: tag, fileURL: dir.appendingPathComponent("a.csv"), startedAt: clock)
+        XCTAssertTrue(session.isResumable(now: clock.addingTimeInterval(5 * 3600)))
+        XCTAssertFalse(session.isResumable(now: clock.addingTimeInterval(7 * 3600)))
+        XCTAssertFalse(session.isResumable(now: clock.addingTimeInterval(-60)))
+    }
 }

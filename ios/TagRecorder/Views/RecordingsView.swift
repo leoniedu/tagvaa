@@ -19,7 +19,7 @@ struct RecordingsView: View {
                         ShareLink(item: url) { Image(systemName: "square.and.arrow.up") }
                     }
                     .swipeActions {
-                        if url != model.recorder.activeSession?.fileURL {
+                        if !(model.recorder.activeSession?.refersTo(url) ?? false) {
                             Button("Apagar", role: .destructive) { model.delete(url) }
                         }
                     }

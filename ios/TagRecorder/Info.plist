@@ -38,6 +38,16 @@
     <array>
         <string>UIInterfaceOrientationPortrait</string>
     </array>
+    <!-- The target also builds for iPad (needed for the Mac Catalyst compile check);
+         iPad multitasking requires all four orientations or the upload is
+         rejected (ITMS-90474), as in YachtVAA. -->
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
     <key>UIFileSharingEnabled</key>
     <true/>
     <key>LSSupportsOpeningDocumentsInPlace</key>
