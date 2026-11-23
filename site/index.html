@@ -7,7 +7,7 @@
 <meta name="description" content="Open firmware that turns a RAK WisMesh Tag into a Bluetooth stroke-rate sensor for outrigger canoes. Any head unit that reads cycling cadence shows strokes per minute.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&display=swap" rel="stylesheet">
 <style>
 :root {
   --lagoon: #0e4d64;
@@ -18,7 +18,7 @@
   --hull: #f2b134;
   --muted: #4c6770;
   --display: "Bricolage Grotesque", system-ui, sans-serif;
-  --body: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --body: "Source Sans 3", system-ui, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --measure: 66ch;
 }
@@ -34,7 +34,7 @@ a { color: var(--lagoon); text-underline-offset: 0.18em; }
 a:hover { color: var(--deep); }
 :focus-visible { outline: 3px solid var(--hull); outline-offset: 3px; border-radius: 2px; }
 code { font-family: var(--mono); font-size: 0.9em; }
-.wrap { max-width: calc(var(--measure) + 3rem); margin: 0 auto; padding: 0 1.5rem; }
+.wrap { max-width: 48rem; margin: 0 auto; padding: 0 1.5rem; }
 
 /* Hero */
 .hero { background: var(--lagoon); color: #fff; position: relative; overflow: hidden; }
@@ -75,7 +75,8 @@ code { font-family: var(--mono); font-size: 0.9em; }
 }
 .readout .rate { font-size: clamp(3.5rem, 9vw, 5.5rem); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--hull); }
 .readout .unit { display: block; font-size: 1rem; font-weight: 500; color: var(--spray); margin-top: 0.35rem; }
-.trace-caption { font-size: 0.875rem; color: var(--spray); padding-bottom: 1.5rem; }
+.hero .wrap.caption-wrap { padding-top: 0.25rem; padding-bottom: 1.75rem; }
+.trace-caption { font-size: 0.875rem; color: var(--spray); margin: 0; }
 
 /* Sections */
 section { padding: 4rem 0 1rem; }
@@ -174,7 +175,7 @@ footer p { margin-bottom: 0.6rem; }
     <canvas id="trace"></canvas>
     <div class="readout"><span class="rate" id="rate">42</span><span class="unit">strokes / min</span></div>
   </div>
-  <div class="wrap">
+  <div class="wrap caption-wrap">
     <p class="trace-caption">Hull surge as the tag sees it after filtering. Each yellow dot is one stroke.</p>
   </div>
 </header>
@@ -196,7 +197,7 @@ footer p { margin-bottom: 0.6rem; }
       <p>A stroke sensor needs an accelerometer, Bluetooth and a battery, in a box that survives spray and rain. The Tag already has all of that, ready-made.</p>
       <dl class="reasons">
         <dt>Sealed against spray</dt>
-        <dd>The case is closed at the factory and rated IP66: protected against rain, spray and strong water jets, but not rated for being underwater. Preferably put it inside a sealed plastic junction box (IP67 or better). Fix the box rigidly to the boat and the Tag rigidly inside it, so the Tag still feels the boat's motion. Otherwise, mount it where water runs off rather than pools, not where bilge water collects. Sealing is the hardest part of a homemade sensor.</dd>
+        <dd>The case is closed at the factory and rated IP66: protected against rain, spray and strong water jets, but not for being underwater (<a href="#mount">mounting tips</a>). Sealing is the hardest part of a homemade sensor.</dd>
         <dt>Rechargeable</dt>
         <dd>A 1000 mAh battery, far more than a session needs, charged through a magnetic USB cable. The same cable carries data for flashing.</dd>
         <dt>Easy to flash and easy to undo</dt>
@@ -275,6 +276,9 @@ python3 -m venv .venv
         </li>
         <li>
           <strong>Pair.</strong> On your head unit, add a cadence sensor and pick “Paddle Stroke”. The green LED blinks once per stroke.
+        </li>
+        <li id="mount">
+          <strong>Mount.</strong> Preferably put the Tag inside a sealed plastic junction box (IP67 or better; plastic so Bluetooth gets through). Fix the box rigidly to the boat and the Tag rigidly inside it, so the Tag still feels the boat's motion. Without a box, mount it where water runs off rather than pools, not where bilge water collects.
         </li>
       </ol>
       <p>More detail on GitHub: <a href="https://github.com/leoniedu/tagvaa/blob/main/docs/flashing.md">building and flashing</a>, <a href="https://github.com/leoniedu/tagvaa/blob/main/docs/hardware.md">hardware</a>, <a href="https://github.com/leoniedu/tagvaa/blob/main/docs/analysis.md">recording and analysing sessions</a> and the <a href="https://github.com/leoniedu/tagvaa/blob/main/docs/devlog.md">development log</a> with every test result.</p>
