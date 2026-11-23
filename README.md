@@ -8,6 +8,13 @@ BLE names: **Paddle Stroke** (cadence sensor, M3/M5) and **Paddle Logger**
 (raw data logger, M4). Renamed from "OC6 …" on 2026-11-17; a phone or CS300
 that paired earlier may still show the old name until it is forgotten.
 
+> **Warning — use at your own risk.** This is experimental firmware for a
+> device it was not made for. Flashing it can leave your Tag unusable
+> ("bricked"), wipe your Meshtastic settings and keys, or drain the battery.
+> Back up first (see [Flashing](#flashing-uf2-drag-and-drop)) and read
+> [Reverting to stock Meshtastic](#reverting-to-stock-meshtastic). It comes
+> with no warranty; see the [license](LICENSE).
+
 ## Hardware facts (verified)
 
 | Item | Value | Source |
@@ -213,7 +220,7 @@ monitor, or hold the front button 5 s.
   data length and MTU 247 on every connection (as M4 does for phones); the
   CS300 then dropped the link after exactly 30 s (an unanswered GATT
   procedure times out), over and over. Without those requests (as in M3)
-  it stays connected (`CS300-1585896` in the log). Phones still negotiate a
+  it stays connected (`CS300-xxxxxxx` in the log). Phones still negotiate a
   large MTU themselves. Some connection attempts still fail at first
   (reason 0x3E) before one sticks.
 - **Smoothing (2026-11-19):** the head unit shows 60 / (time between the
@@ -365,7 +372,7 @@ then on the CS300 add a cadence sensor: it should find "Paddle Stroke" and show
   `# BLE connected [n] <peer>` / `# streaming to [n]`.
 - Phone recording (verified 2026-11-17, iPhone): **Bluefruit Connect** →
   connect (the phone may show the Tag's old Meshtastic name, e.g.
-  `Skei_c129`; if connecting fails, Settings → Bluetooth → Forget This
+  `Name_xxxx`; if connecting fails, Settings → Bluetooth → Forget This
   Device) → UART → record → export as CSV/text. The export is
   `Timestamp,Mode,Data` with one BLE packet per row; `read_accel()` detects
   it and rejoins lines split across packets. First test: 94.5 s, 0 lost,
@@ -465,3 +472,10 @@ Connect, recording) and watch (paddling activity with stroke rate) both
 running; ~30 s still at start and end; 10+ min including steady pieces at
 different rates. Export the Bluefruit log and the watch activity (TCX or
 FIT), then run `stroke_rate.R` with both.
+
+## License
+
+GPL-3.0 (see [LICENSE](LICENSE)). The board and pin definitions are derived
+from [Meshtastic](https://github.com/meshtastic/firmware), which is GPL-3.0.
+This program is distributed WITHOUT ANY WARRANTY, without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
