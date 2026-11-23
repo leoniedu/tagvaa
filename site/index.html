@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paddle Stroke: stroke rate for outrigger canoes</title>
+<meta name="description" content="Open firmware that turns a RAK WisMesh Tag into a Bluetooth stroke-rate sensor for outrigger canoes. Any head unit that reads cycling cadence shows strokes per minute.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --lagoon: #0e4d64;
+  --deep: #082f3e;
+  --reef: #eaf4f2;
+  --ink: #102a33;
+  --spray: #7fc8c2;
+  --hull: #f2b134;
+  --muted: #4c6770;
+  --display: "Bricolage Grotesque", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --measure: 66ch;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--reef);
+  color: var(--ink);
+  font: 1.0625rem/1.6 var(--body);
+}
+a { color: var(--lagoon); text-underline-offset: 0.18em; }
+a:hover { color: var(--deep); }
+:focus-visible { outline: 3px solid var(--hull); outline-offset: 3px; border-radius: 2px; }
+code { font-family: var(--mono); font-size: 0.9em; }
+.wrap { max-width: calc(var(--measure) + 3rem); margin: 0 auto; padding: 0 1.5rem; }
+
+/* Hero */
+.hero { background: var(--lagoon); color: #fff; position: relative; overflow: hidden; }
+.hero .wrap { position: relative; z-index: 1; padding-top: 4.5rem; padding-bottom: 2rem; }
+.hero h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(3rem, 11vw, 6.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  margin: 0 0 1.25rem;
+}
+.hero p.lede { font-size: 1.25rem; line-height: 1.45; max-width: 34ch; margin: 0 0 2rem; color: #dcefee; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; align-items: center; }
+.button {
+  display: inline-block;
+  background: var(--hull);
+  color: var(--deep);
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 999px;
+}
+.button:hover { background: #ffc552; color: var(--deep); }
+.hero a.plain { color: #fff; }
+.trace { position: relative; height: 260px; margin-top: 1rem; }
+.trace canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.readout {
+  position: absolute;
+  right: clamp(1rem, 6vw, 5rem);
+  top: 0;
+  padding: 0.6rem 0.9rem;
+  background: var(--lagoon);
+  border-radius: 10px;
+  text-align: right;
+  font-family: var(--display);
+  line-height: 1;
+}
+.readout .rate { font-size: clamp(3.5rem, 9vw, 5.5rem); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--hull); }
+.readout .unit { display: block; font-size: 1rem; font-weight: 500; color: var(--spray); margin-top: 0.35rem; }
+.trace-caption { font-size: 0.875rem; color: var(--spray); padding-bottom: 1.5rem; }
+
+/* Sections */
+section { padding: 4rem 0 1rem; }
+h2 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 1.25rem;
+  color: var(--deep);
+}
+h3 { font-family: var(--display); font-weight: 500; font-size: 1.25rem; margin: 0 0 0.25rem; color: var(--deep); }
+p { margin: 0 0 1rem; max-width: var(--measure); }
+
+/* Pipeline: a real sequence, from hull motion to the number on screen */
+.pipeline { list-style: none; margin: 2rem 0 0; padding: 0; counter-reset: step; }
+.pipeline li {
+  counter-increment: step;
+  position: relative;
+  padding: 0 0 1.75rem 3.25rem;
+}
+.pipeline li::before {
+  content: counter(step);
+  position: absolute; left: 0; top: 0;
+  width: 2.1rem; height: 2.1rem;
+  border-radius: 50%;
+  background: var(--lagoon); color: #fff;
+  font: 800 1rem/2.1rem var(--display);
+  text-align: center;
+}
+.pipeline li:not(:last-child)::after {
+  content: "";
+  position: absolute; left: 1.02rem; top: 2.4rem; bottom: 0.3rem;
+  width: 2px; background: var(--spray);
+}
+.pipeline li:last-child::before { background: var(--hull); color: var(--deep); }
+.pipeline p { margin: 0; color: var(--muted); }
+
+/* Results */
+.figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 1.5rem 2rem; margin: 2rem 0; }
+.figure strong { display: block; font: 800 2.4rem/1 var(--display); color: var(--lagoon); font-variant-numeric: tabular-nums; }
+.figure span { display: block; color: var(--muted); font-size: 0.95rem; margin-top: 0.4rem; }
+.limits { padding-left: 1.2rem; max-width: var(--measure); }
+.limits li { margin-bottom: 0.5rem; }
+
+/* Status timeline */
+.status { width: 100%; max-width: var(--measure); border-collapse: collapse; margin-top: 1.5rem; }
+.status th, .status td { text-align: left; vertical-align: top; padding: 0.7rem 0.75rem 0.7rem 0; border-top: 1px solid #c4dcd8; }
+.status th { font-weight: 700; white-space: nowrap; }
+.status td.state { white-space: nowrap; color: var(--muted); }
+.status tr.done td.state { color: var(--lagoon); font-weight: 700; }
+.status tr.now td.state { color: #8a5a00; font-weight: 700; }
+
+/* Get started */
+.warning {
+  max-width: var(--measure);
+  background: #fff4dc;
+  border-left: 6px solid var(--hull);
+  padding: 1.1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  border-radius: 0 8px 8px 0;
+}
+.warning p { margin: 0; }
+.steps { padding-left: 1.4rem; max-width: var(--measure); }
+.steps li { margin-bottom: 1.1rem; padding-left: 0.25rem; }
+pre {
+  background: var(--deep);
+  color: #e6f4f2;
+  padding: 0.9rem 1.1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0.6rem 0 0;
+  max-width: var(--measure);
+}
+
+footer { margin-top: 4rem; background: var(--deep); color: #b9d6d3; padding: 2.5rem 0 3rem; font-size: 0.95rem; }
+footer a { color: #fff; }
+footer p { margin-bottom: 0.6rem; }
+
+@media (max-width: 560px) {
+  .trace { height: 200px; }
+  .status td.state { white-space: normal; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Paddle Stroke</h1>
+    <p class="lede">Strokes per minute for outrigger canoes, measured by a small tag on the hull and shown on the bike computer you already own.</p>
+    <div class="actions">
+      <a class="button" href="#get-started">Get started</a>
+      <a class="plain" href="https://github.com/leoniedu/tagvaa">Source on GitHub</a>
+    </div>
+  </div>
+  <div class="trace" aria-hidden="true">
+    <canvas id="trace"></canvas>
+    <div class="readout"><span class="rate" id="rate">42</span><span class="unit">strokes / min</span></div>
+  </div>
+  <div class="wrap">
+    <p class="trace-caption">Hull surge as the tag sees it after filtering. Each yellow dot is one stroke.</p>
+  </div>
+</header>
+
+<main>
+  <section id="what">
+    <div class="wrap">
+      <h2>What it is</h2>
+      <p>Paddle Stroke is open firmware for the <a href="https://docs.rakwireless.com/product-categories/meshtastic/wismesh-tag/quickstart/">RAK WisMesh Tag</a>, a small Meshtastic tracker with an accelerometer and Bluetooth. Fix the Tag to the hull and it acts as a standard Bluetooth cycling cadence sensor. Each paddle stroke counts as one pedal turn, so a bike computer's cadence field shows your stroke rate.</p>
+      <p>It was built and tested with a COOSPO CS300 head unit, first in an OC1 and with an OC6 as the goal. Any device that pairs with a Bluetooth cadence sensor should work the same way.</p>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <h2>From hull motion to a number</h2>
+      <p>Everything runs on the Tag. There is no phone app and no calibration step.</p>
+      <ol class="pipeline">
+        <li><h3>Sample the hull</h3><p>The LIS2DH accelerometer is read 100 times a second.</p></li>
+        <li><h3>Find the surge</h3><p>Gravity is removed and the Tag works out which horizontal direction the boat surges along, however it is mounted.</p></li>
+        <li><h3>Keep the paddling band</h3><p>A 0.5–2 Hz band-pass filter keeps the rhythm of strokes and drops slow swell and fast vibration.</p></li>
+        <li><h3>Track the rhythm</h3><p>A running autocorrelation picks the stroke period five times a second. Rates outside 24–110 per minute are not shown, so the display goes blank instead of guessing.</p></li>
+        <li><h3>Send it as cadence</h3><p>The Tag advertises as “Paddle Stroke” using the standard Cycling Speed and Cadence profile, and the head unit shows strokes per minute.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="results">
+    <div class="wrap">
+      <h2>How well it works so far</h2>
+      <p>Measured on two OC1 sessions and on the bench. Steady paddling compared with a watch, in 12-second windows:</p>
+      <div class="figures">
+        <div class="figure"><strong>2.4</strong><span>strokes/min mean absolute error</span></div>
+        <div class="figure"><strong>76%</strong><span>of windows within ±3 strokes/min</span></div>
+        <div class="figure"><strong>1.3</strong><span>strokes/min jitter, against 3.5 for simple peak counting</span></div>
+      </div>
+      <h3>Known limits</h3>
+      <ul class="limits">
+        <li>It takes about 10 seconds of paddling before a rate appears.</li>
+        <li>After you stop, the display blanks in 4–8 seconds in calm water and can take up to 19 seconds in rough water.</li>
+        <li>Waves that roll at a paddling-like rhythm can't be told apart from strokes.</li>
+        <li>Very slow paddling, around 15–20 strokes per minute, is not reliably caught.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="status">
+    <div class="wrap">
+      <h2>Status</h2>
+      <p>The project is built in small, separately flashable steps. Each one has its own firmware file.</p>
+      <table class="status">
+        <tbody>
+          <tr class="done"><th scope="row"><code>m1_hello</code></th><td>USB serial and LEDs</td><td class="state">Done</td></tr>
+          <tr class="done"><th scope="row"><code>m2_accel</code></th><td>Accelerometer readings</td><td class="state">Done</td></tr>
+          <tr class="done"><th scope="row"><code>m3_csc</code></th><td>Bluetooth cadence sensor at a fixed 60/min</td><td class="state">Done</td></tr>
+          <tr class="done"><th scope="row"><code>m4_logger</code></th><td>Raw 100 Hz data logger over Bluetooth</td><td class="state">Done</td></tr>
+          <tr class="done"><th scope="row"><code>m5_stroke</code></th><td>Stroke counting by peak detection</td><td class="state">Fallback</td></tr>
+          <tr class="now"><th scope="row"><code>m5_acf</code></th><td>Stroke rate from the autocorrelation tracker</td><td class="state">Water testing</td></tr>
+          <tr><th scope="row">Next</th><td>Power management for long sessions</td><td class="state">Planned</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="get-started">
+    <div class="wrap">
+      <h2>Get started</h2>
+      <div class="warning" role="note">
+        <p><strong>Use at your own risk.</strong> This is experimental firmware for a device it wasn't made for. Flashing it can leave your Tag unusable, erase your Meshtastic settings and keys, or drain the battery. Back up first and keep the <a href="https://github.com/leoniedu/tagvaa#reverting-to-stock-meshtastic">steps to revert to stock</a> at hand. There is no warranty.</p>
+      </div>
+      <ol class="steps">
+        <li>
+          <strong>Build the firmware.</strong> PlatformIO goes into a local virtual environment; nothing is installed system-wide.
+<pre><code>git clone https://github.com/leoniedu/tagvaa
+cd tagvaa
+python3 -m venv .venv
+.venv/bin/pip install platformio
+.venv/bin/pio run -e m5_acf      # writes firmware/m5_acf.uf2</code></pre>
+        </li>
+        <li>
+          <strong>Put the Tag in bootloader mode.</strong> From stock Meshtastic, run <code>meshtastic --port /dev/cu.usbmodem* --enter-dfu</code>. From this firmware, type <code>dfu</code> in the serial monitor or hold the front button for 5 seconds. A USB drive named <code>RAK4631</code> appears.
+        </li>
+        <li>
+          <strong>Check before you copy.</strong> Open <code>INFO_UF2.TXT</code>: the SoftDevice line must say <code>S140 6.1.x</code>. If it says 7.x, stop. Copy <code>CURRENT.UF2</code> somewhere safe as a full backup.
+        </li>
+        <li>
+          <strong>Flash.</strong> Copy <code>firmware/m5_acf.uf2</code> onto the drive. The Tag reboots into the new firmware by itself.
+        </li>
+        <li>
+          <strong>Pair.</strong> On your head unit, add a cadence sensor and pick “Paddle Stroke”. The green LED blinks once per stroke.
+        </li>
+      </ol>
+      <p>Hardware details, the data logger, analysis scripts and every test result are in the <a href="https://github.com/leoniedu/tagvaa#readme">README</a>.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><a href="https://github.com/leoniedu/tagvaa">leoniedu/tagvaa</a> on GitHub.</p>
+    <p>Licensed under <a href="https://github.com/leoniedu/tagvaa/blob/main/LICENSE">GPL-3.0</a>. Board definitions are derived from <a href="https://github.com/meshtastic/firmware">Meshtastic</a>. Not affiliated with RAKwireless, Meshtastic or COOSPO.</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const canvas = document.getElementById("trace");
+  const ctx = canvas.getContext("2d");
+  const rateEl = document.getElementById("rate");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const secondsShown = 8;
+  let w = 0, h = 0, dpr = 1;
+
+  // Synthetic surge: a paddling rhythm whose rate drifts 38-48/min, with a
+  // second harmonic for the catch and a little sea noise.
+  const rateAt = t => 43 + 5 * Math.sin(t / 9);
+  function surge(t, p) {
+    const x = 2 * Math.PI * p;
+    return Math.sin(x) + 0.35 * Math.sin(2 * x + 0.8)
+      + 0.06 * Math.sin(t * 23.1) + 0.05 * Math.sin(t * 37.7 + 1.3);
+  }
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    w = canvas.clientWidth; h = canvas.clientHeight;
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  // Incremental phase so animation stays cheap.
+  let lastT = 0, lastP = 0;
+  const history = [];
+  function advance(t) {
+    const step = 0.02;
+    while (lastT + step <= t) {
+      lastT += step;
+      lastP += rateAt(lastT) / 60 * step;
+      history.push([lastT, lastP]);
+    }
+    while (history.length && history[0][0] < t - secondsShown - 0.5) history.shift();
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, w, h);
+    const mid = h * 0.58, amp = h * 0.28;
+    const x = s => w - (t - s) / secondsShown * w;
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#7fc8c2";
+    ctx.beginPath();
+    history.forEach(([s, p], i) => {
+      const y = mid - amp * surge(s, p);
+      i ? ctx.lineTo(x(s), y) : ctx.moveTo(x(s), y);
+    });
+    ctx.stroke();
+    // A stroke is marked at each whole turn of the phase, at the surge peak.
+    ctx.fillStyle = "#f2b134";
+    for (let i = 1; i < history.length; i++) {
+      const [s0, p0] = history[i - 1], [s1, p1] = history[i];
+      const n = Math.floor(p1 - 0.17);
+      if (n > Math.floor(p0 - 0.17)) {
+        const y = mid - amp * surge(s1, p1);
+        ctx.beginPath();
+        ctx.arc(x(s1), y, 6, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+    }
+    rateEl.textContent = Math.round(rateAt(t));
+  }
+
+  resize();
+  window.addEventListener("resize", () => { resize(); draw(lastT); });
+
+  const start = 30;
+  lastT = start - secondsShown - 0.5;
+  advance(start);
+
+  if (reduce) { draw(start); return; }
+  const t0 = performance.now();
+  function frame(now) {
+    const t = start + (now - t0) / 1000;
+    advance(t);
+    draw(t);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
