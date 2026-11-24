@@ -18,6 +18,7 @@ wrong along the way. Hardware notes and the rail test are in
 | 6 | — | Power management | later |
 | — | `docs/junction_box.md` | Sidequest: solar + battery junction box | paper design |
 | — | — | Idea: stroke rate as a Meshtastic module ([below](#possible-future-a-meshtastic-module)) | not started |
+| — | — | Idea: private club tracking service (live boat map, geofence, alerts) ([below](#possible-future-a-private-club-tracking-service)) | not started |
 | T | `t_rail` | Test: what is on the switched 3.3 V rail | ✅ run 2026-11-17: GNSS on the rail, accelerometer not |
 
 ### 5 — Stroke detector + cadence (`m5_stroke.uf2`)
@@ -203,3 +204,77 @@ To check first (unverified assumptions): Meshtastic's nRF52 build uses
 Bluefruit, as we do, and already reads the accelerometer for motion
 features; how hard it is to add a second BLE service next to Meshtastic's
 own.
+
+## Possible future: a private club tracking service
+
+Idea, not started (2026-11-23). A club wants to see its boats live (safety,
+coaching from shore) without publishing members' positions. Two separate
+questions: the **transport** (how position and stroke data leave the water)
+and the **service** (what the club does with them). The service is worth
+building whichever transport is used.
+
+**Service.** The club's own server: decode, store, then a live map, geofence
+alerts ("boat outside the area", "boat stopped for 2 min"), and a feed into
+yachtvaa. Private by design: it only talks to the club's own gateway.
+
+**Meshtastic privacy.** Positions are exposed only with defaults: the default
+primary channel uses a well-known key, and a node with MQTT uplink can publish
+to public maps. A club setup: private primary channel with its own key, no
+public MQTT, positions only on the private channel, relaying limited to the
+club's nodes. Remaining weak spots: packet headers (node IDs, the fact of
+transmitting) are not encrypted; one shared key, so a lost device or departed
+member means re-keying every node; one misconfigured member device (default
+channel, MQTT on) can leak positions.
+
+**Transport options.**
+
+| | Meshtastic module (fork) | Own simple LoRa broadcast |
+|---|---|---|
+| Relaying between boats and shore | yes, built in | no: point to point to a roof antenna (several km over open water) |
+| Phone apps, map, messages (e.g. escort boat) | yes, free | no, build what is needed |
+| Encryption | yes, with the caveats above | easy (nRF52 AES), but ours to get right |
+| What is sent | Meshtastic packet types; custom data as a private app packet | exactly what we want: position, stroke rate, capsize flag |
+| Battery | GPS, LoRa and mesh always on | one short packet every 15–30 s |
+| Bluetooth to the CS300 | shares the radio with Meshtastic's phone link | unchanged |
+| Maintenance | rebasing a large fork forever | small and ours |
+| Receiving end | any Meshtastic node | a club gateway (a second Tag or similar) |
+| Radio rules | handled by Meshtastic | ours (915 MHz in Brazil; ANATEL limits not checked) |
+
+Leaning: build the service first; use our own simple LoRa uplink from the
+Tag; fork Meshtastic only if the club wants its whole ecosystem (relaying,
+apps, messages). If it does, stock Meshtastic on separate trackers,
+configured privately, is simpler than merging it into tagvaa.
+
+**Getting Meshtastic data into the service.** One gateway node at the club
+with a roof antenna; the service listens to it and never touches the public
+mesh.
+
+```
+boats (Meshtastic trackers, private channel)
+        │  LoRa
+        ▼
+club gateway node (roof antenna)
+        │  USB / Wi-Fi / MQTT
+        ▼
+club service: decode → database → map, geofence, alerts, yachtvaa
+```
+
+1. USB to an always-on computer at the club (Raspberry Pi, Mac mini): the
+   `meshtastic` Python library delivers each packet decrypted with the channel
+   key; keep position (lat, lon, time, optional speed and heading), battery
+   and custom packets; map node name → boat. No broker, nothing leaves the
+   club except what the service publishes.
+2. A Wi-Fi/Ethernet (ESP32) node over TCP: same library and code, computer
+   anywhere on the network.
+3. MQTT to the club's own broker (Mosquitto with password and TLS, not
+   Meshtastic's public one; map reporting off; uplink "encryption enabled" so
+   packets stay encrypted until the service decrypts them). For an nRF52 node
+   without Wi-Fi, a phone running the Meshtastic app can relay ("MQTT client
+   proxy"), but that phone must stay on.
+
+Tracker settings: position interval 30–60 s (the default ~15 min is too slow
+for a live map; shorter costs airtime and battery); full precision only on
+the private channel; node name = boat name. Stroke rate or a capsize flag
+need the forked module (private app packet); stock Meshtastic sends only
+positions and battery.
+
